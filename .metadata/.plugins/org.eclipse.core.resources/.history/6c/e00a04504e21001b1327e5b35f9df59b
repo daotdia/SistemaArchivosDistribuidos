@@ -1,0 +1,25 @@
+package es.uned.sisdist.common;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
+
+public interface ServicioDatosInterface extends Remote{
+	
+	public boolean registrarObjeto (String nombre) throws RemoteException;
+	
+	public int putRepositorio (int id_cliente) throws RemoteException;
+	
+	public boolean quitRepositorio (int id_cliente) throws RemoteException;
+	
+	public Map<Integer, List<Integer>> getRepositoriosCliente (int id_cliente)
+			throws RemoteException;
+	
+	public List<Integer> getListaRepositorios (int sesion) throws RemoteException;
+	
+	public List<String> getListaFicheros (int sesion) throws RemoteException;
+	
+	public List<String> getListaClientes (int sesion) throws RemoteException;
+	
+}

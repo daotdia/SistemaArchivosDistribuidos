@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move element &apos;ServicioDatosInterface.java&apos; to &apos;Servidor/src/es.uned.sisdist.servidor&apos;&#x0A;- Original project: &apos;Common&apos;&#x0A;- Destination element: &apos;Servidor/src/es.uned.sisdist.servidor&apos;&#x0A;- Original element: &apos;es.uned.sisdist.common.ServicioDatosInterface.java&apos;&#x0A;- Update references to refactored element" description="Move compilation unit" destination="=Servidor/src&lt;es.uned.sisdist.servidor" element1="/src&lt;es.uned.sisdist.common{ServicioDatosInterface.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" patterns="*" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1604773870300" units="1" version="1.0"/>
+</session>

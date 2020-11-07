@@ -1,0 +1,16 @@
+package es.uned.sisdist.common;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface ServicioAutenticacionInterface extends Remote {
+	
+	public String registrarObjeto (String nombre, int tipo) throws RemoteException;
+		
+	public int iniciarSesion (String nombre) throws RemoteException;
+	
+	public int getIdSesion (String nombre) throws RemoteException;
+	
+	public boolean deleteUsuario (String nombre) throws RemoteException;
+		
+}

@@ -1,0 +1,12 @@
+package es.uned.sisdist.common;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface ServicioClOperadorInterface extends Remote{
+	
+	//Sube el archivo el mismo a partir de la URL que le da el cliente
+	public boolean subirArchivo (URL URL) throws RemoteException;
+	
+	public boolean deleteArchivo (URL URL) throws RemoteException;
+}

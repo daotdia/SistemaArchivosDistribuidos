@@ -1,0 +1,12 @@
+package es.uned.sisdist.common;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+public interface ServicioGestorInterface extends Remote{
+
+	public boolean subbirArchivo(int sesion, Fichero fichero) 
+			throws RemoteException;
+	
+	
+}

@@ -1,0 +1,1 @@
+module CompiladorCes {exports compiler.intermediate;exports compiler.lexical;exports compiler.test;exports compiler.code;exports compiler.semantic.symbol;exports compiler.semantic.type;exports compiler;exports compiler.syntax.nonTerminal;requires Cup;requires JFlex;requires compiler.api;}

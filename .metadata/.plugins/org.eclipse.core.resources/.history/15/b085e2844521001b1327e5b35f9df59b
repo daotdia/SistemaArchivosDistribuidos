@@ -1,0 +1,41 @@
+package es.uned.sisdist.servidor;
+
+import java.rmi.RemoteException;
+
+import es.uned.sisdist.common.ServicioAutenticacionInterface;
+
+public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface{
+
+	private static int identificador = 0;
+	
+	public ServicioAutenticacionImpl(ServicioDatos)
+	
+	@Override
+	public String registrarse(String nombre) throws RemoteException {
+		return nombre;
+	}
+
+	@Override
+	public int iniciarSesion(String nombre) throws RemoteException {
+		
+		return 0;
+	}
+
+	@Override
+	public int getIdSesion(String nombre) throws RemoteException {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public boolean deleteUsuario(String nombre) throws RemoteException {
+		// TODO Auto-generated method stub
+		return false;
+	}
+	
+	public static int getSesion() {
+		return identificador++;
+	}
+
+	
+}

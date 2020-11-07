@@ -1,0 +1,8 @@
+package es.uned.sisdist.servidor;
+
+import java.rmi.Remote;
+
+public interface ServicioDatosInterface extends Remote{
+
+	
+}

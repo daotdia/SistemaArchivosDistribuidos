@@ -1,0 +1,10 @@
+package es.uned.sisdist.common;
+
+import java.rmi.RemoteException;
+
+public interface ServicioDiscoClienteInterface {
+	
+	//Descarga al path indicado por el cliente el archivo indicado en la
+	//URL pasada por el Servicio Servidor-Operador
+	public boolean bajarFichero (String URL) throws RemoteException;
+}
