@@ -5,7 +5,7 @@ import java.rmi.RemoteException;
 
 public interface ServicioSrOperadorInterface extends Remote{
 	//Crea la carpeta del cliente donde se gestionaran sus archivos.
-	public boolean crearCarpeta (int identifciador) throws RemoteException;
+	public boolean crearCarpeta (int identifciador, int id_repositorio) throws RemoteException;
 	
 	public boolean borrarCarpeta (int identifciador) throws RemoteException;
 	

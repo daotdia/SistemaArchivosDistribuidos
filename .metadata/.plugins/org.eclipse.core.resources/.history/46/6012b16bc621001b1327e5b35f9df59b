@@ -1,0 +1,45 @@
+package es.uned.sisdist.servidor;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
+
+import es.uned.sisdist.common.ServicioDatosInterface;
+
+public class Servidor implements Remote {
+	
+	private static ServicioDatosImpl bd;
+	private static ServicioAutenticacionImpl au;
+	private static List<Repositorio> repositorios;
+	
+	private static final int NUMERO_REPOSITORIOS = 100;
+	
+	public Servidor() throws RemoteException {
+		repositorios = (new Repositorio()).inicializarRepositorios(NUMERO_REPOSITORIOS);
+		bd = new ServicioDatosImpl(repositorios);
+		au = new ServicioAutenticacionImpl(bd);
+	}
+	
+	public void gestion_usuarios (String nombre, int tipo, int opcion) 
+			throws RemoteException {
+		switch(opcion) {
+		case 0:
+			au.registrarObjeto(nombre, tipo);
+			break;
+		case 1:
+			int id = au.iniciarSesion(nombre, tipo);
+			bd.linkRepositorio(id);
+			crearCarpeta();
+			break;
+		case 2:
+			int id = au.cerrarSesion(nombre, tipo);
+			bd.unlinkRepositorio();
+			deleteCarpeta();
+			break;
+		case 3:
+			au.deleteObjeto(nombre, tipo);
+			break;
+		}
+	}
+	
+}

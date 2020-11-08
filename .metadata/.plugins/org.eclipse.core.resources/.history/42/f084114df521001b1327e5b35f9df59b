@@ -1,0 +1,57 @@
+package es.uned.sisdist.servidor;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
+
+import es.uned.sisdist.common.Repositorio;
+import es.uned.sisdist.common.ServicioDatosInterface;
+import es.uned.sisdist.common.SourcePath;
+
+public class Servidor implements Remote {
+	
+	private static ServicioDatosImpl bd;
+	private static ServicioAutenticacionImpl au;
+	private static List<Repositorio> repositorios;
+	
+	private static final int NUMERO_REPOSITORIOS = 100;
+	
+	public Servidor(ServicioDatosImpl bd, ServicioAutenticacionImpl au) throws RemoteException {
+		this.bd = bd;
+		this.au = au;
+	}
+	
+	public static void main (String[] Args) throws Exception{
+		SourcePath.setCodebase(Servidor.class);
+		
+		Servidor servidor = new 
+		
+		
+	}
+	
+	public static void gestion_usuarios (String nombre, int tipo, int opcion) 
+			throws RemoteException {
+		int id_cliente;
+		int id_repositorio;
+		
+		switch(opcion) {
+		case 0:
+			au.registrarObjeto(nombre, tipo);
+			break;
+		case 1:
+			id_cliente = au.iniciarSesion(nombre, tipo);
+			id_repositorio = bd.linkRepositorio(id_cliente);
+			crearCarpeta(id_cliente, id_repositorio);
+			break;
+		case 2:
+			id_cliente = au.cerrarSesion(nombre, tipo);
+			id_repositorio = bd.unlinkRepositorios(id_cliente);
+			deleteCarpeta(id_cliente, id_repositorio);
+			break;
+		case 3:
+			au.deleteObjeto(nombre, tipo);
+			break;
+		}
+	}
+	
+}

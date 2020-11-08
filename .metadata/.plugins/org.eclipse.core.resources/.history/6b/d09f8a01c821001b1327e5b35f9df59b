@@ -1,0 +1,11 @@
+package es.uned.sisdist.common;
+
+import es.uned.sisdist.common.RepositorioInt;
+
+public class Repositorio implements RepositorioInt {
+
+	
+	public int getId() {
+		
+	}
+}

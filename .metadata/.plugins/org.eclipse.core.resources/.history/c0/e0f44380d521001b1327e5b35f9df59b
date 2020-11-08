@@ -1,0 +1,20 @@
+package es.uned.sisdist.common;
+
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class Repositorio implements Remote{
+	
+	private String nombre;
+	private int identificador; 
+	
+	public Repositorio (String nombre) throws RemoteException {
+		this.nombre = nombre;
+	}
+	
+	public int getId() {
+		
+	}
+}

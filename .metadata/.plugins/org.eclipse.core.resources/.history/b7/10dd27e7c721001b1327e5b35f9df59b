@@ -1,0 +1,8 @@
+package es.uned.sisdist.common;
+
+import java.rmi.Remote;
+
+public interface RepositorioInt extends Remote {
+	
+	
+}

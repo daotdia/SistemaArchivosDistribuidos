@@ -9,7 +9,7 @@ public interface ServicioAutenticacionInterface extends Remote {
 		
 	public int iniciarSesion (String nombre, int tipo) throws RemoteException;
 	
-	public void cerrarSesion (String nombre, int tipo) throws RemoteException;
+	public int cerrarSesion (String nombre, int tipo) throws RemoteException;
 	
 	public int getIdSesion (String nombre, int tipo) throws RemoteException;
 	
