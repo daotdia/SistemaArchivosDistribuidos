@@ -15,17 +15,18 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	private List<String> usuarios_registrados;
 	private List<String> repositorios_registrados;
 	private HashMap<String, Integer> usuarios_activos;
-	private HashMap<String, Integer> repositorios_activos;
-	private HashMap<Integer,String> repositorio_usuario;
-	private HashMap<Integer, List<MetaFichero>> ficheros_usuario;
+	private HashMap<String, Integer> repositorios_logueados;
+	private HashMap<String, Repositorio> repositorios_activos;
+	private HashMap<String,String> repositorio_usuario;
+	private HashMap<String, List<MetaFichero>> ficheros_usuario;
 	
 	public ServicioDatosImpl () {
 		usuarios_registrados = new ArrayList<String>();
 		repositorios_registrados = new ArrayList<String>();
 		usuarios_activos = new HashMap<String,Integer>();
-		repositorios_activos = new HashMap<String,Integer>();
-		repositorio_usuario = new HashMap<Integer,String>();
-		ficheros_usuario = new HashMap<Integer,List<MetaFichero>>();
+		repositorios_logueados = new HashMap<String,Integer>();
+		repositorio_usuario = new HashMap<String,String>();
+		ficheros_usuario = new HashMap<String,List<MetaFichero>>();
 	}
 
 	public void registrarCliente(String nombre) throws RemoteException {
@@ -38,9 +39,11 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 
 	public void deleteCliente(String nombre) throws RemoteException {
 		usuarios_registrados.remove(usuarios_registrados.indexOf(nombre));
+		unlinkRepositorio(nombre);
 	}
 
 	public void deleteRepositorio(String nombre) throws RemoteException {
+		//Mantengo el repositorio activo por si durante la sesión el cliente quiere hacer algo más con él.
 		repositorios_registrados.remove(repositorios_registrados.indexOf(nombre));
 	}
 
@@ -51,36 +54,39 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 			usuarios_activos.put(nombre, identificador);
 		}
 		else
-			repositorios_activos.put(nombre,identificador);
+			repositorios_logueados.put(nombre,identificador);
 	}
 
 	@Override
-	public int linkRepositorio(int id_cliente) throws RemoteException {
-		int identificador = -1;
-		if(!repositorios_activos.isEmpty()) {
+	public Repositorio linkRepositorio(String nombre_cliente) throws RemoteException {
+		Repositorio repo;
+		if(!repositorios_logueados.isEmpty()) {
 			//Añado un repositorio aleatorio a la lista de repositorios del usuario.
-			int ialea = (int) Math.random()*repositorios_activos.size();
-			String [] keys = repositorios_activos.keySet().toArray(new String[repositorios_activos.keySet().size()]);
-			String nombre = keys[ialea];
-			repositorio_usuario.put(id_cliente,nombre);
-			//Asocio el identificador con el identificador del repositorio añadido.
-			identificador = repositorios_activos.get(keys[ialea]);
+			int ialea = (int) Math.random()*repositorios_logueados.size();
+			String [] keys = repositorios_logueados.keySet().toArray(new String[repositorios_logueados.keySet().size()]);
+			String nombre_repositorio = keys[ialea];
+			//No inicializo hasta que es necesario el repositorio, hasta este momento el usuario puede haber dado de alta e
+			//iniciado sesion muchos repositorios pero cada objeto repositorio no se habrá inicializado hasta que un cliente lo
+			//necesite.
+			if(!repositorios_activos.containsKey(nombre_repositorio)) {				
+				repo = new Repositorio(nombre_repositorio);
+				repo.setId(repositorios_logueados.get(nombre_repositorio));
+				repositorios_activos.put(nombre_repositorio, repo);
+				System.out.println("Repositorio inicializado " + nombre_repositorio);
+			}
+			else
+				repo = repositorios_activos.get(nombre_repositorio);
+			repositorio_usuario.put(nombre_cliente,nombre_repositorio);
 		}
 		else 
 			throw new RuntimeException ("No quedan repositorios libres, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
-		return identificador;
+		return repo;
 	}
 
-	public void unlinkRepositorio(int id_cliente) throws RuntimeException {
-		if(!repositorio_usuario.containsKey(id_cliente)) {
-			repositorio_usuario.remove(id_cliente);
+	public void unlinkRepositorio(String nombre_cliente) throws RuntimeException {
+		if(repositorio_usuario.containsKey(nombre_cliente)) {
+			repositorio_usuario.remove(nombre_cliente);
 		}
-	}
-
-	public Map<Integer, String> getRepositorioCliente(int id_cliente) throws RemoteException {
-		return new HashMap<Integer,String>(){{
-			put(id_cliente, repositorio_usuario.get(id_cliente));
-		}};
 	}
 	
 	public List<String> getListaRepositoriosLinkados() throws RemoteException {
@@ -93,10 +99,14 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		return repositorios_registrados;
 	}
 	
-	public  HashMap<String, Integer> getListaRepositoriosActivos() throws RemoteException {
+	public  HashMap<String, Repositorio> getListaRepositoriosActivos() throws RemoteException {
 		return repositorios_activos;
 	} 
-
+	
+	public  HashMap<String, Integer> getListaRepositoriosLogueados() throws RemoteException {
+		return repositorios_logueados;
+	} 
+	
 	//PENDIENTE DE VER COMO SON LOS ARCHIVOS DEL EQUIPO DOCENTE 
 	public List<MetaFichero> getListaFicheros(int sesion) throws RemoteException {
 		// TODO Auto-generated method stub
@@ -109,5 +119,26 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 
 	public HashMap<String, Integer> getListaClientesActivos() throws RemoteException {
 		return usuarios_activos;
+	}
+	
+	public int getIdCliente(String nombre) throws RemoteException {
+		return usuarios_activos.get(nombre);
+	}
+	
+	public int getIdRepositorio(String nombre) throws RemoteException {
+		return repositorios_logueados.get(nombre);
+	}
+	
+	public void addRepositorioActivo(Repositorio repo, String nombre_repositorio) throws RemoteException {
+		repositorios_activos.put(nombre_repositorio, repo);
+	}
+	
+	public Repositorio getRepositorioActivo (String nombre) throws RemoteException {
+		return repositorios_activos.get(nombre);
+	}
+	
+	public Repositorio getRepositorioUsuario(String nombre_cliente) throws RemoteException {
+		String nombre_repositorio = repositorio_usuario.get(nombre_cliente);
+		return repositorios_activos.get(nombre_repositorio);
 	}
 }

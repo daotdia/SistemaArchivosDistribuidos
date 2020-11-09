@@ -1,5 +1,6 @@
 package es.uned.sisdist.common;
 
+import java.io.File;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
@@ -9,13 +10,22 @@ public class Repositorio implements Remote{
 	
 	private String nombre;
 	private int identificador; 
+	private String path;
 	
 	public Repositorio (String nombre) throws RemoteException {
 		this.nombre = nombre;
+		//El path del repositorio va a ser su dirección de trabajo actua, en un directorio con su nombre.
+		path = System.getProperty("user.dir")+ "/Repositorio_" + nombre;
+		File directorio=new File(path);
+		directorio.mkdir();
 	}
 	
 	public int getId() {
 		return identificador;
+	}
+	
+	public String getPath() {
+		return path;
 	}
 	
 	public void setId(int id) {
@@ -25,15 +35,4 @@ public class Repositorio implements Remote{
 	public String getNombre() {
 		return nombre;
 	}
-	
-	//Necesito utilizar método equals para poder determinar si dentro de una lista de repositorios
-	//existe un repositorio con dicho nombre (ya que el método contains de ArrayList utiliza este método)
-	@Override
-    public boolean equals(Object o){
-        if(o instanceof Repositorio){
-             Repositorio p = (Repositorio) o;
-             return this.nombre.equals(p.getNombre());
-        } else
-             return false;
-    }
 }

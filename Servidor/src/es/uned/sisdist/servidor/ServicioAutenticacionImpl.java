@@ -49,8 +49,8 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 			if(bd.getListaClientesRegistrados().contains(nombre)) {
 				sesion = getIdentificador();
 				bd.addId(nombre, sesion, 0);
-				id_repositorio = bd.linkRepositorio(sesion);
-				sg.crearCarpeta(sesion, id_repositorio);
+				Repositorio repo = bd.linkRepositorio(nombre);
+				sg.crearCarpeta(repo, nombre);
 				System.out.println("Se ha logueado el cliente " + nombre);
 			}
 			else
@@ -79,7 +79,7 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 		}
 		if (tipo == 1) {
 			if(bd.getListaRepositoriosActivos().containsKey(nombre))
-				identificador = bd.getListaRepositoriosActivos().get(nombre);
+				identificador = bd.getListaRepositoriosLogueados().get(nombre);
 			else
 				throw new RuntimeException ("Repositorio no logueado");
 		}
@@ -90,8 +90,11 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 	//que cierre sesión.
 	public void deleteObjeto(String nombre, int tipo) throws RemoteException {
 		if(tipo == 0) {
-			if(bd.getListaClientesRegistrados().contains(nombre))
+			if(bd.getListaClientesRegistrados().contains(nombre)) {
+				Repositorio repo = bd.getRepositorioUsuario(nombre);
+				sg.borrarCarpeta(repo, nombre);
 				bd.deleteCliente(nombre);
+			}
 			else
 				throw new RuntimeException ("Cliente no registrado");
 		}
@@ -109,16 +112,15 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 			if(bd.getListaClientesActivos().containsKey(nombre)) {
 				identificador = bd.getListaClientesActivos().get(nombre);
 				bd.getListaClientesActivos().remove(nombre);
-				bd.unlinkRepositorio(identificador);
-				sg.borrarCarpeta(identificador);
 			}
 			else 
 				throw new RuntimeException ("Cliente no logueado");
 		}
 		if(tipo==1) {
-			if(bd.getListaRepositoriosActivos().containsKey(nombre)) {
-				identificador = bd.getListaRepositoriosActivos().get(nombre);
-				bd.getListaRepositoriosActivos().remove(nombre);
+			if(bd.getListaRepositoriosLogueados().containsKey(nombre)) {
+				bd.getListaRepositoriosLogueados().remove(nombre);
+				if(bd.getListaRepositoriosActivos().containsKey(nombre))
+					bd.getListaRepositoriosActivos().remove(nombre);
 			}
 			else 
 				throw new RuntimeException ("Repositorio no logueado");
