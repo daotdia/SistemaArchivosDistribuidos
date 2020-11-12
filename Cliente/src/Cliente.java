@@ -10,11 +10,12 @@ public class Cliente {
 	public static void main(String[] args) throws Exception {
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		int opcion = -1;
-		String nombre;
+		String nombre = "";
 		Scanner in = new Scanner(System.in);
+		
 		ServidorInterface servidor = (ServidorInterface) registry.lookup("servidor_remoto");
 		
-		while(opcion != 3) {
+		while(opcion < 3) {
 			switch(args[0]) {
 				case "cliente":
 					System.out.println("Elige la opción de autenticacion");
@@ -60,6 +61,41 @@ public class Cliente {
 								break;
 						}
 						break;
+				}
+				if(args[0].equals("cliente") && opcion == 2 && servidor.comprobarCliente(nombre)) {
+					while(opcion != 6 || opcion != 7) {
+						System.out.println("Elige la opción de gestión de archivos que considere");
+						System.out.println("1. Subir Archivo");
+						System.out.println("2. Bajar Archivo");
+						System.out.println("3. Compartir Fichero");
+						System.out.println("4. Listar tus ficheros");
+						System.out.println("5. Listar clientes del sistema");
+						System.out.println("6. Cerrar Sesion");
+						System.out.println("7. Eliminar perfil");
+						opcion = in.nextInt();
+						in.nextLine();
+						String path = null;
+						String nombre_fichero = null;
+						switch(opcion) {
+						case 1:
+							//Subir fihchero en path indicado.
+							System.out.println("Indique el path del archivo");
+							path = in.nextLine();
+							System.out.println("Indique el nombre del archivo");
+							nombre_fichero = in.nextLine();
+							servidor.gestion_archivos(nombre, nombre_fichero, path, 0);
+							System.out.println("Indique el nombre del archivo");
+							break;
+						case 2: 
+							System.out.println("Indique el nombre del repositorio");
+							nombre = in.nextLine();					
+							servidor.menu_inicial(nombre, 1, opcion-1);
+							break;
+						case 6:
+							opcion = 6;
+							break;
+						}
+					}
 				}
 					
 			}

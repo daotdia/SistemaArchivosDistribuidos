@@ -27,6 +27,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		repositorios_logueados = new HashMap<String,Integer>();
 		repositorio_usuario = new HashMap<String,String>();
 		ficheros_usuario = new HashMap<String,List<MetaFichero>>();
+		repositorios_activos = new HashMap<String, Repositorio>();
 	}
 
 	public void registrarCliente(String nombre) throws RemoteException {
@@ -140,5 +141,14 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	public Repositorio getRepositorioUsuario(String nombre_cliente) throws RemoteException {
 		String nombre_repositorio = repositorio_usuario.get(nombre_cliente);
 		return repositorios_activos.get(nombre_repositorio);
+	}
+	
+	public void addMetaFichero(MetaFichero metafichero, String nombre_cliente) throws RemoteException {
+		if(!ficheros_usuario.containsKey(nombre_cliente))
+			ficheros_usuario.put(nombre_cliente, new ArrayList<MetaFichero>() {{
+				add(metafichero);
+			}});
+		else
+			ficheros_usuario.get(nombre_cliente).add(metafichero);
 	}
 }

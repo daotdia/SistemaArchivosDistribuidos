@@ -46,4 +46,7 @@ public interface ServicioDatosInterface extends Remote{
 	public Repositorio getRepositorioUsuario(String nombre_cliente) throws RemoteException;
 	
 	public void addRepositorioActivo(Repositorio repo, String nombre) throws RemoteException;
+	
+	public void addMetaFichero(MetaFichero metafichero, String nombre_cliente) throws RemoteException;
+
 }
