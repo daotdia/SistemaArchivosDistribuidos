@@ -30,7 +30,9 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public Repositorio getRepositorioActivo (String nombre) throws RemoteException;
 	
-	public HashMap<String, List<MetaFichero>> getListaFicheros (String nombre_cliente) throws RemoteException;
+	public List<MetaFichero> getListaFicheros (String nombre_cliente) throws RemoteException;
+	
+	public HashMap<String, List<MetaFichero>> getListaRepositorioFicheros (String nombre_cliente) throws RemoteException;
 	
 	public List<String> getListaClientesRegistrados () throws RemoteException;
 	

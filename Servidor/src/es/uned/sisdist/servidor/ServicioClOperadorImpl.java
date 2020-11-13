@@ -30,13 +30,7 @@ public class ServicioClOperadorImpl implements ServicioClOperadorInterface{
 	}
 	
 	@Override
-	public void subirArchivo(String path, String nombre_fichero, String nombre_cliente) throws RemoteException, IOException {
-		Repositorio repo = bd.getRepositoriosUsuario(nombre_cliente).get(new Random().nextInt(bd.getRepositoriosUsuario(nombre_cliente).size()));
-		System.out.println("Creando Fichero");
-		Fichero fichero = new Fichero(path, nombre_fichero, nombre_cliente);
-		System.out.println("Fichero creado");
-		bd.addMetaFichero(repo.getNombre(),new MetaFichero(fichero), nombre_cliente);
-		System.out.println("Tratando de iniciar subida");
+	public void subirArchivo(Fichero fichero,Repositorio repo, String nombre_cliente, String nombre_fichero) throws RemoteException, IOException {
 		File output = new File(repo.getPath()+ "/" + nombre_cliente + "/" + nombre_fichero);
 		OutputStream os = new FileOutputStream(output);
 		fichero.escribirEn(os);
@@ -45,22 +39,9 @@ public class ServicioClOperadorImpl implements ServicioClOperadorInterface{
 
 	//Elimina todos los archivos que se llamas igual en los dsitintos repositorios del usuario.
 	@Override
-	public void deleteArchivo(String nombre_fichero, String nombre_cliente) throws RemoteException {
-		Repositorio repo;
-		boolean bandera = false;
-		HashMap<String,List<MetaFichero>> ficheros_usuario = bd.getListaFicheros(nombre_cliente);
-		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.entrySet()) {
-			for(MetaFichero fichero : entrada.getValue()) {
-				if(fichero.getNombre().equals(nombre_fichero)) {
-					repo = bd.getRepositorioActivo(entrada.getKey());
-					File file = new File(repo.getPath() + "/" + nombre_cliente + "/" + nombre_fichero);
-					file.delete();
-					bandera = true;
-				}
-			}
-		}
-		if(!bandera)
-			throw new RuntimeException ("Fichero no encontrado, no se puede eliminar");
+	public void deleteArchivo(Repositorio repo, String nombre_fichero, String nombre_cliente) throws RemoteException {
+		File file = new File(repo.getPath() + "/" + nombre_cliente + "/" + nombre_fichero);
+		file.delete();
 	}
 
 }

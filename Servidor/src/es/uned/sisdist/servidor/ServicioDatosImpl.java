@@ -125,10 +125,21 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		return repositorios_logueados;
 	} 
 	
-	public HashMap<String, List<MetaFichero>> getListaFicheros(String nombre_cliente) throws RemoteException {
-		return ficheros_usuario.get(nombre_cliente);
+	public List<MetaFichero> getListaFicheros(String nombre_cliente) throws RemoteException {
+		List<MetaFichero> ficheros = new ArrayList<MetaFichero>();
+		if(ficheros_usuario.get(nombre_cliente) != null) {
+			for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.get(nombre_cliente).entrySet()) {
+				for(MetaFichero fichero : entrada.getValue()) {	
+				ficheros.add(fichero);
+				}
+			}
+		}
+		return ficheros;
 	}
 
+	public HashMap<String, List<MetaFichero>> getListaRepositorioFicheros (String nombre_cliente) throws RemoteException {
+		return ficheros_usuario.get(nombre_cliente);
+	}
 	public List<String> getListaClientesRegistrados() throws RemoteException {
 		return usuarios_registrados;
 	}

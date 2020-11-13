@@ -1,0 +1,67 @@
+package es.uned.sisdist.servidor;
+
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.Map;
+
+import es.uned.sisdist.common.ServicioGestorInterface;
+import es.uned.sisdist.common.URL;
+
+public class ServicioGestorImpl implements ServicioGestorInterface{
+
+	@Override
+	public URL subirFichero(int sesion) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public URL bajarFichero(int sesion, int identificador) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public URL borrarFichero(int sesion, int identificador) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Integer> compartirFichero(int sesion, int identificador, List<Integer> destinatarios)
+			throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getListaFicheros(int sesion) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<String> getListaClientes(int sesion) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Integer> getListaRepositorios(int sesion) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<Integer, List<Integer>> getRepositoriosCliente(int sesion) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void salir() throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

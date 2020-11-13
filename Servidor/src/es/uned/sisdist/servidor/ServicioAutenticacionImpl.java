@@ -132,4 +132,8 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 	public static int getIdentificador() {
 		return identificador++;
 	}
+	
+	public boolean comprobarCliente (String nombre) throws RemoteException{
+		return bd.getListaClientesActivos().containsKey(nombre);
+	}
 }

@@ -45,23 +45,8 @@ public class ServiciosSrOperadorImpl implements ServicioSrOperadorInterface {
 	//Baja todos los archivos del nombre indicado, serán varios en el caso de que se encuentren archivos del mismo
 	//nombre en varios repositorios.
 	@Override
-	public void bajarArchivo(String nombre_fichero, String nombre_cliente, String path_local) throws RemoteException, Exception {
-		Repositorio repo;
-		boolean bandera = false;
-		HashMap<String,List<MetaFichero>> ficheros_usuario = bd.getListaFicheros(nombre_cliente);
-		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.entrySet()) {
-			for(MetaFichero fichero : entrada.getValue()) {
-				if(fichero.getNombre().equals(nombre_fichero)) {
-					repo = bd.getRepositorioActivo(entrada.getKey());
-					dc.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
-					bandera = true;
-					break;
-				}
-			}
-		}
-		if (!bandera) {
-			throw new RuntimeException ("Fichero de nombre " + nombre_fichero + " no encontrado");
-		}
+	public void bajarFichero(Repositorio repo, String nombre_fichero, String path_local, String nombre_cliente) throws RemoteException, Exception {
+		dc.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
 	}
 
 }

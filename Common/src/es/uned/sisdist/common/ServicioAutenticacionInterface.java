@@ -14,5 +14,7 @@ public interface ServicioAutenticacionInterface extends Remote {
 	public int getIdSesion (String nombre, int tipo) throws RemoteException;
 	
 	public void deleteObjeto (String nombre, int tipo) throws RemoteException;
+	
+	public boolean comprobarCliente (String nombre) throws RemoteException;
 		
 }
