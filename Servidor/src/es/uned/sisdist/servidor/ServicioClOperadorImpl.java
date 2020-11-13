@@ -9,6 +9,10 @@ import java.nio.file.Paths;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import es.uned.sisdist.common.Fichero;
 import es.uned.sisdist.common.MetaFichero;
@@ -27,11 +31,11 @@ public class ServicioClOperadorImpl implements ServicioClOperadorInterface{
 	
 	@Override
 	public void subirArchivo(String path, String nombre_fichero, String nombre_cliente) throws RemoteException, IOException {
-		Repositorio repo = bd.getRepositorioUsuario(nombre_cliente);
+		Repositorio repo = bd.getRepositoriosUsuario(nombre_cliente).get(new Random().nextInt(bd.getRepositoriosUsuario(nombre_cliente).size()));
 		System.out.println("Creando Fichero");
 		Fichero fichero = new Fichero(path, nombre_fichero, nombre_cliente);
 		System.out.println("Fichero creado");
-		bd.addMetaFichero(new MetaFichero(fichero), nombre_cliente);
+		bd.addMetaFichero(repo.getNombre(),new MetaFichero(fichero), nombre_cliente);
 		System.out.println("Tratando de iniciar subida");
 		File output = new File(repo.getPath()+ "/" + nombre_cliente + "/" + nombre_fichero);
 		OutputStream os = new FileOutputStream(output);
@@ -39,9 +43,24 @@ public class ServicioClOperadorImpl implements ServicioClOperadorInterface{
 		System.out.println("Fichero "+ nombre_fichero + " de " + nombre_cliente + " subido en " + repo.getPath());
 	}
 
+	//Elimina todos los archivos que se llamas igual en los dsitintos repositorios del usuario.
 	@Override
-	public void deleteArchivo(MetaFichero metafichero, String nombre_cliente) throws RemoteException {
-		// TODO Auto-generated method stub
+	public void deleteArchivo(String nombre_fichero, String nombre_cliente) throws RemoteException {
+		Repositorio repo;
+		boolean bandera = false;
+		HashMap<String,List<MetaFichero>> ficheros_usuario = bd.getListaFicheros(nombre_cliente);
+		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.entrySet()) {
+			for(MetaFichero fichero : entrada.getValue()) {
+				if(fichero.getNombre().equals(nombre_fichero)) {
+					repo = bd.getRepositorioActivo(entrada.getKey());
+					File file = new File(repo.getPath() + "/" + nombre_cliente + "/" + nombre_fichero);
+					file.delete();
+					bandera = true;
+				}
+			}
+		}
+		if(!bandera)
+			throw new RuntimeException ("Fichero no encontrado, no se puede eliminar");
 	}
 
 }

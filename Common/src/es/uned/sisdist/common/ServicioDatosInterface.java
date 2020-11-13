@@ -22,8 +22,6 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public void unlinkRepositorio(String Nombre) throws RemoteException;
 	
-	public List<String> getListaRepositoriosLinkados () throws RemoteException;
-	
 	public List<String> getListaRepositoriosRegistrados () throws RemoteException;
 	
 	public HashMap<String, Integer> getListaRepositoriosLogueados () throws RemoteException;
@@ -32,7 +30,7 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public Repositorio getRepositorioActivo (String nombre) throws RemoteException;
 	
-	public List<MetaFichero> getListaFicheros (int sesion) throws RemoteException;
+	public HashMap<String, List<MetaFichero>> getListaFicheros (String nombre_cliente) throws RemoteException;
 	
 	public List<String> getListaClientesRegistrados () throws RemoteException;
 	
@@ -43,10 +41,10 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public int getIdRepositorio(String nombre) throws RemoteException;
 	
-	public Repositorio getRepositorioUsuario(String nombre_cliente) throws RemoteException;
+	public List<Repositorio> getRepositoriosUsuario(String nombre_cliente) throws RemoteException;
 	
 	public void addRepositorioActivo(Repositorio repo, String nombre) throws RemoteException;
 	
-	public void addMetaFichero(MetaFichero metafichero, String nombre_cliente) throws RemoteException;
-
+	public void addMetaFichero(String nombre_repositorio,MetaFichero metafichero, String nombre_cliente) throws RemoteException;
+	
 }

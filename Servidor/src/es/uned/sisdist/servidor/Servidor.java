@@ -12,6 +12,7 @@ import es.uned.sisdist.common.Repositorio;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
 import es.uned.sisdist.common.ServicioClOperadorInterface;
 import es.uned.sisdist.common.ServicioDatosInterface;
+import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 import es.uned.sisdist.common.ServicioSrOperadorInterface;
 import es.uned.sisdist.common.ServidorInterface;
 import es.uned.sisdist.common.SourcePath;

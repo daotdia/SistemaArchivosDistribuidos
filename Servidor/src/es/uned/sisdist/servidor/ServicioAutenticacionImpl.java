@@ -91,8 +91,9 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 	public void deleteObjeto(String nombre, int tipo) throws RemoteException {
 		if(tipo == 0) {
 			if(bd.getListaClientesRegistrados().contains(nombre)) {
-				Repositorio repo = bd.getRepositorioUsuario(nombre);
-				sg.borrarCarpeta(repo, nombre);
+				for (Repositorio repo : bd.getRepositoriosUsuario(nombre)) {
+					sg.borrarCarpeta(repo, nombre);
+				}
 				bd.deleteCliente(nombre);
 			}
 			else

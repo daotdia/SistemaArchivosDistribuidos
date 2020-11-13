@@ -1,7 +1,10 @@
+import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
+import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 import es.uned.sisdist.common.ServidorInterface;
 
 public class Cliente {
@@ -12,6 +15,10 @@ public class Cliente {
 		int opcion = -1;
 		String nombre = "";
 		Scanner in = new Scanner(System.in);
+		
+		ServicioDiscoClienteInterface sdc = new ServicioDiscoClienteImpl();
+		Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, 3434);
+		registry.rebind("sdc_remoto", sdc_remoto);
 		
 		ServidorInterface servidor = (ServidorInterface) registry.lookup("servidor_remoto");
 		
@@ -87,7 +94,7 @@ public class Cliente {
 							System.out.println("Indique el nombre del archivo");
 							break;
 						case 2: 
-							System.out.println("Indique el nombre del repositorio");
+							System.out.println("Indique el path local donde bajar el archivo");
 							nombre = in.nextLine();					
 							servidor.menu_inicial(nombre, 1, opcion-1);
 							break;

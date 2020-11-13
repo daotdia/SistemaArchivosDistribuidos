@@ -4,20 +4,27 @@ import java.io.File;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import es.uned.sisdist.common.MetaFichero;
 import es.uned.sisdist.common.Repositorio;
 import es.uned.sisdist.common.ServicioDatosInterface;
+import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 import es.uned.sisdist.common.ServicioSrOperadorInterface;
 import es.uned.sisdist.common.URL;
 
 public class ServiciosSrOperadorImpl implements ServicioSrOperadorInterface {
 
 	private ServicioDatosInterface bd;
+	private ServicioDiscoClienteInterface dc;
+	
 	
 	public ServiciosSrOperadorImpl() throws Exception{
 		Registry registry = LocateRegistry.getRegistry(7777);
 		this.bd = (ServicioDatosInterface) registry.lookup("datos_remotos");
+		this.dc = (ServicioDiscoClienteInterface) registry.lookup("sdc_remoto");
 	}
 	
 	@Override
@@ -35,10 +42,26 @@ public class ServiciosSrOperadorImpl implements ServicioSrOperadorInterface {
 		System.out.println("Carpeta eleminada en path " + directorio);
 	}
 
+	//Baja todos los archivos del nombre indicado, serán varios en el caso de que se encuentren archivos del mismo
+	//nombre en varios repositorios.
 	@Override
-	public String bajarArchivo(URL URL) throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+	public void bajarArchivo(String nombre_fichero, String nombre_cliente, String path_local) throws RemoteException, Exception {
+		Repositorio repo;
+		boolean bandera = false;
+		HashMap<String,List<MetaFichero>> ficheros_usuario = bd.getListaFicheros(nombre_cliente);
+		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.entrySet()) {
+			for(MetaFichero fichero : entrada.getValue()) {
+				if(fichero.getNombre().equals(nombre_fichero)) {
+					repo = bd.getRepositorioActivo(entrada.getKey());
+					dc.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
+					bandera = true;
+					break;
+				}
+			}
+		}
+		if (!bandera) {
+			throw new RuntimeException ("Fichero de nombre " + nombre_fichero + " no encontrado");
+		}
 	}
 
 }
