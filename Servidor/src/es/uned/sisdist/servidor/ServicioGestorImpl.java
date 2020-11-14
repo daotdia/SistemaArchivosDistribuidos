@@ -102,8 +102,12 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	}
 
 	@Override
-	public List<String> getListaClientes(String nombre_cliente) throws RemoteException {
+	public List<String> getListaClientesSistema() throws RemoteException {
 		return servicio_datos.getListaClientesRegistrados();
+	}
+	
+	public List<String> getListaClientesRepositorio(String nombre_repositorio) throws RemoteException {
+		return servicio_datos.getListaClientesRepositorio(nombre_repositorio);
 	}
 
 	@Override
@@ -122,6 +126,10 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	public void salir() throws RemoteException {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public List<String> getFicherosClienteRepositorio(String nombre_cliente, String nombre_repositorio) throws RemoteException{
+		return servicio_datos.getFicherosClienteRepositorio(nombre_cliente, nombre_repositorio);
 	}
 
 }

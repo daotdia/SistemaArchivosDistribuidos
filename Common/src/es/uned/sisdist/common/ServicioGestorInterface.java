@@ -24,12 +24,16 @@ public interface ServicioGestorInterface extends Remote{
 	
 	public List<String> getListaFicheros (String nombre_cliente) throws RemoteException;
 	
-	public List<String> getListaClientes (String nombre_cliente) throws RemoteException;
+	public List<String> getListaClientesSistema () throws RemoteException;
+	
+	public List<String> getListaClientesRepositorio (String nombre_repositorio) throws RemoteException;
 	
 	public List<Integer> getListaRepositorios (int sesion) throws RemoteException;
 	
 	public Map<Integer, List<Integer>> getRepositoriosCliente (int sesion)
 			throws RemoteException;
+	
+	public List<String> getFicherosClienteRepositorio(String nombre_cliente, String nombre_repositorio) throws RemoteException;
 	
 	public void salir() throws RemoteException;
 }

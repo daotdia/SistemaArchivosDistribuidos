@@ -18,6 +18,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	private HashMap<String, Integer> repositorios_logueados;
 	private HashMap<String, Repositorio> repositorios_activos;
 	private HashMap<String,List<String>> repositorio_usuario;
+	//HashMao para cada usuario, con sus repositorios activos linkados que tienen archivos.
 	private HashMap<String, HashMap<String,List<MetaFichero>>> ficheros_usuario;
 	
 	public ServicioDatosImpl () {
@@ -182,5 +183,25 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 			}});
 		else
 			ficheros_usuario.get(nombre_cliente).get(nombre_repositorio).add(metafichero);
+	}
+	
+	public List<String> getListaClientesRepositorio (String nombre_repositorio) throws RemoteException{
+		List<String> usuarios_repositorio = new ArrayList<String>();
+		for(Map.Entry<String, List<String>> entrada : repositorio_usuario.entrySet()){
+			for(String nombre_repo : entrada.getValue()) {
+				if(nombre_repo.equals(nombre_repositorio))
+					usuarios_repositorio.add(entrada.getKey());
+			}
+		}
+		return usuarios_repositorio;
+	}
+	
+	public List<String> getFicherosClienteRepositorio(String nombre_cliente, String nombre_repositorio) throws RemoteException{
+		List<MetaFichero> ficheros = ficheros_usuario.get(nombre_cliente).get(nombre_repositorio);
+		List<String> nombre_ficheros = new ArrayList<String>();
+		for(MetaFichero fichero : ficheros) {
+			nombre_ficheros.add(fichero.getNombre());
+		}
+		return nombre_ficheros;
 	}
 }
