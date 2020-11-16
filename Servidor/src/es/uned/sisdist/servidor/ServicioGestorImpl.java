@@ -18,15 +18,15 @@ import es.uned.sisdist.common.ServicioClOperadorInterface;
 import es.uned.sisdist.common.ServicioDatosInterface;
 import es.uned.sisdist.common.ServicioGestorInterface;
 import es.uned.sisdist.common.ServicioSrOperadorInterface;
-import es.uned.sisdist.common.URL;
 
 public class ServicioGestorImpl implements ServicioGestorInterface{
-	private ServicioDatosInterface servicio_datos;
-	private ServicioSrOperadorInterface sso;
-	private ServicioClOperadorInterface sco;
+	private static ServicioDatosInterface servicio_datos;
+	private static ServicioSrOperadorInterface sso;
+	private static ServicioClOperadorInterface sco;
+	private static Registry registry;
 	
 	public ServicioGestorImpl () throws RemoteException, NotBoundException {
-		Registry registry =  LocateRegistry.getRegistry(7777);
+		registry =  LocateRegistry.getRegistry(7777);
 		
 		servicio_datos = (ServicioDatosInterface) registry.lookup("datos_remotos"); 
 		sso = (ServicioSrOperadorInterface) registry.lookup("sso_remoto");
@@ -48,17 +48,18 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	public void bajarFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception{
 		Repositorio repo;
 		boolean bandera = false;
-		HashMap<String,List<MetaFichero>> ficheros_usuario = servicio_datos.getListaRepositorioFicheros(nombre_cliente);
-		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.entrySet()) {
-			for(MetaFichero fichero : entrada.getValue()) {
-				if(fichero.getNombre().equals(nombre_fichero)) {
-					repo = servicio_datos.getRepositorioActivo(entrada.getKey());
-					sso.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
-					bandera = true;
-					break;
-				}
-			}
-		}
+		List<String> nombres_ficheros = servicio_datos.getListaFicherosCliente(nombre_cliente);
+ 		for(String nombre : nombres_ficheros) {
+ 			if(nombre.equals(nombre_fichero)) {
+ 				System.out.println("Fichero encontrado");
+ 				//No me immporta de cuál se baje, aunque se podría modificar esta decisión.
+ 				repo = servicio_datos.getRepositorioFichero(nombre_fichero, nombre_cliente);
+ 				sso.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
+ 				System.out.println("Fichero bajado");
+ 				bandera = true;
+ 				break;
+ 			}
+ 		}
 		if (!bandera) {
 			throw new RuntimeException ("Fichero de nombre " + nombre_fichero + " no encontrado");
 		}
@@ -66,7 +67,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 
 	@Override
 	public void borrarFichero(String nombre_cliente, String nombre_fichero) throws RemoteException {
-		Repositorio repo;
+		/* Repositorio repo;
 		boolean bandera = false;
 		HashMap<String,List<MetaFichero>> ficheros_usuario = servicio_datos.getListaRepositorioFicheros(nombre_cliente);
 		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.entrySet()) {
@@ -81,7 +82,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 			}
 		}
 		if (bandera == false) {
-			throw new RuntimeException ("Fichero de nombre " + nombre_fichero + " no encontrado");		}
+			throw new RuntimeException ("Fichero de nombre " + nombre_fichero + " no encontrado");		} **/
 	}
 
 	@Override

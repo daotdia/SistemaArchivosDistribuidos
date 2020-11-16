@@ -17,5 +17,9 @@ public class MetaFichero implements Serializable {
 	public String getNombre() {
 		return nombre;
 	}
+	
+	public String getPropietario() {
+		return propietario;
+	}
 
 }

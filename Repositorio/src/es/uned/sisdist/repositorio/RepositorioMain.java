@@ -14,74 +14,123 @@ public class RepositorioMain {
 	private static ServicioAutenticacionInterface servicio_autenticacion;
 	private static ServicioGestorInterface servicio_gestor; 
 	
-	public void main (String [] args) throws RemoteException, NotBoundException {
+	public static void main (String [] args) throws Exception {
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		int opcion = -1;
 		String nombre_repositorio = "";
 		Scanner in = new Scanner(System.in);
-		
+		boolean salir = false;
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("autenticacion_remota");
 		servicio_gestor = (ServicioGestorInterface) registry.lookup("sg_remoto");
 		
-		System.out.println("Elige la opción de autenticacion");
-		System.out.println("1. Registrar repositorio");
-		System.out.println("2. Iniciar sesion repositorio");
-		System.out.println("3. Exit");
-		opcion = in.nextInt();
-		in.nextLine();
-		while(opcion != 3) {
+		while(!salir) {
+			System.out.println("Elige la opción de autenticacion");
+			System.out.println("1. Registrar repositorio");
+			System.out.println("2. Iniciar sesion repositorio");
+			System.out.println("3. Exit");
+			opcion = in.nextInt();
+			in.nextLine();
 			switch(opcion) {
 				case 1:
 					System.out.println("Indique el nombre del repositorio");
 					String nombre = in.nextLine();					
-					servicio_autenticacion.registrarObjeto(nombre, 1);
+					boolean registrado = servicio_autenticacion.registrarObjeto(nombre, 1);
+					if(!registrado) {
+						System.out.println("Ya existe un repositorio registrado con nombre " + nombre + " pruebe con otro nombre");
+					}
+					else
+						System.out.println("Repositorio registrado con nombre " + nombre);
+					System.out.println("");
 					break;
 				case 2: 
-					System.out.println("Indique el nombre del repositorio");
-					nombre_repositorio = in.nextLine();					
-					servicio_autenticacion.iniciarSesion(nombre_repositorio, 1);
+					try {
+						System.out.println("Indique el nombre del repositorio");
+						nombre_repositorio = in.nextLine();					
+						servicio_autenticacion.iniciarSesion(nombre_repositorio, 1);
+						System.out.println("Repositorio conectado con nombre " + nombre_repositorio);
+						System.out.println("");
+					}
+					catch (RuntimeException e){
+						System.out.println("Repositorio no regitrado, registrelo antes de intentar iniciar sesión");
+						System.out.println("");
+						break;
+					}
 					break;
 				case 3:
+					System.out.println("");
 					System.out.println("Gracias por utilizar el sistema, vuelva pronto!");
-					opcion = 3;
+					salir = true;
+					break;
+				default:
+					System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-3).");
 					break;
 			}
-			if(opcion == 2 && servicio_autenticacion.comprobarCliente(nombre_repositorio)) {
-				while(opcion != 3 || opcion != 4 || opcion != 5) {
+			if(opcion == 2 && servicio_autenticacion.comprobarRepositorio(nombre_repositorio)) {
+				while(!salir && opcion != 3) {
 					System.out.println("Elige la operación de repositorio");
 					System.out.println("1. Listar clientes");
 					System.out.println("2. Listar ficheros del cliente");
 					System.out.println("3. Cerrar Sesion");
-					System.out.println("4. Eliminar Repositorio");
-					System.out.println("5. Cerrar sesion y salir");
+					System.out.println("4. Cerrar sesion y salir");
+					System.out.println("5. Eliminar Repositorio y salir");
 					opcion = in.nextInt();
 					in.nextLine();
 					switch(opcion) {
 						case 1: 
-							System.out.println("Los clientes con archivos en este repositorio actualmente son:");
-							System.out.println(Arrays.toString(servicio_gestor.getListaClientesRepositorio(nombre_repositorio).toArray()));	
-							break;
+							try {
+								System.out.println("Los clientes con archivos en este repositorio actualmente son:");
+								System.out.println(Arrays.toString(servicio_gestor.getListaClientesRepositorio(nombre_repositorio).toArray()));	
+								System.out.println("");
+								break;
+							}
+							catch (NullPointerException e) {
+								System.out.println("Este repositorio todavía no tiene clientes");
+								System.out.println("");
+								break;
+							}
 						case 2:
-							System.out.println("Indique el nombre del cliente:");
-							String nombre_cliente = in.nextLine();
-							System.out.println("Los archivos del cliente en este repositorio son:");
-							System.out.println(Arrays.toString(servicio_gestor.getFicherosClienteRepositorio(nombre_cliente, nombre_repositorio).toArray()));
+							try {
+								System.out.println("Indique el nombre del cliente:");
+								String nombre_cliente = in.nextLine();
+								System.out.println("Los archivos del cliente en este repositorio son:");
+								System.out.println(Arrays.toString(servicio_gestor.getFicherosClienteRepositorio(nombre_cliente, nombre_repositorio).toArray()));
+								System.out.println("");
+								break;
+							}
+							catch (NullPointerException e){
+								System.out.println("Este cliente todavía no tiene archivos en este repositorio");
+								System.out.println("");
+								break;
+							}
 						case 3:
 							servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
 							System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
-							opcion = 4;
+							System.out.println("");
+							break;
 						case 4:
-							servicio_autenticacion.deleteObjeto(nombre_repositorio, 1);
-							System.out.println("Repositorio " + nombre_repositorio + " eliminado");
-							opcion = 5;
+							servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
+							System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
+							salir = true;
+							System.out.println("Gracias por usar el sistema, vuelve pronto!");
+							System.out.println("");
+							break;
 						case 5:
 							servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
 							System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
-							opcion = 3;
+							servicio_autenticacion.deleteObjeto(nombre_repositorio, 1);
+							System.out.println("Repositorio " + nombre_repositorio + " eliminado");
 							System.out.println("Gracias por usar el sistema, vuelve pronto!");
+							salir = true;
+							System.out.println("");
+							break;
+						default:
+							System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-5).");
+							System.out.println("");
+							break;		
 					}	
 				}
 			}	
 		}
+		in.close();
 	}
 }

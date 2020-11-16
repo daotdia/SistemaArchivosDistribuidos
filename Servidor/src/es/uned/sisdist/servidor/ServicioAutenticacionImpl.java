@@ -3,10 +3,8 @@ package es.uned.sisdist.servidor;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
+import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.Repositorio;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
 import es.uned.sisdist.common.ServicioDatosInterface;
@@ -16,51 +14,67 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 
 	private static int identificador = 0;
 	
-	private ServicioDatosInterface bd;
-	private ServicioSrOperadorInterface sg;
+	private static ServicioDatosInterface bd;
+	private static ServicioSrOperadorInterface sg;
+	private static Registry registry;
 	
 	public ServicioAutenticacionImpl() throws Exception {
-		Registry registry = LocateRegistry.getRegistry(7777);
-		this.bd = (ServicioDatosInterface) registry.lookup("datos_remotos");
-		this.sg = (ServicioSrOperadorInterface) registry.lookup("sso_remoto");
+		registry = LocateRegistry.getRegistry(7777);
+		ServicioAutenticacionImpl.bd = (ServicioDatosInterface) registry.lookup("datos_remotos");
+		ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("sso_remoto");
 	}
 	
-	public void registrarObjeto(String nombre, int tipo) throws RemoteException {
+	public boolean registrarObjeto(String nombre, int tipo) throws RemoteException {
 		if(tipo == 0)	
 			if(!bd.getListaClientesRegistrados().contains(nombre)) {
 				bd.registrarCliente(nombre);
-				System.out.println("Se ha registrado el cliente " + nombre);
+				return true;
 			}
-			else 
-				System.out.println("El nombre proporcionado ya está en uso, modifíquelo");
+			else {
+				return false;
+			}
 		if(tipo == 1)	
-			if(!bd.getListaRepositoriosRegistrados().contains(new Repositorio(nombre))) {
+			if(!bd.getListaRepositoriosRegistrados().contains(nombre)) {
 				bd.registrarRepositorio(nombre);
-				System.out.println("Se ha registrado el repositorio " + nombre);
+				return true;
 			}
-			else 
-				System.out.println("El nombre proporcionado ya está en uso, modifíquelo");
+			else {
+				return false;
+			}
+		return false;
 	}
 
-	public int iniciarSesion(String nombre, int tipo) throws RemoteException {
+	public int iniciarSesion(String nombre, int tipo) throws RuntimeException, Exception {
 		int sesion = -1;
-		int id_repositorio;
 		if(tipo == 0) {
-			if(bd.getListaClientesRegistrados().contains(nombre)) {
-				sesion = getIdentificador();
-				bd.addId(nombre, sesion, 0);
-				Repositorio repo = bd.linkRepositorio(nombre);
-				sg.crearCarpeta(repo, nombre);
-				System.out.println("Se ha logueado el cliente " + nombre);
+			try {
+				if(bd.getListaClientesRegistrados().contains(nombre)) {
+					sesion = getIdentificador();
+					System.out.println("tratando de iniciar sesion cliente");
+					Repositorio repo = bd.linkRepositorio(nombre);
+					System.out.println(repo.getNombre());
+					sg.crearCarpeta(repo.getPath(), nombre);
+					bd.addId(nombre, sesion, 0);
+				}
+				else {
+					bd.getListaClientesActivos().remove(nombre);
+					throw new RuntimeException ("Usuario no registrado");
+				}
+			} 
+			catch (CustomExceptions.NoHayRepositoriosLibres e) {
+				throw new CustomExceptions.NoHayRepositoriosLibres("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
 			}
-			else
-				throw new RuntimeException ("Usuario no registrado");
+			catch (CustomExceptions.ObjetoNoRegistrado e) {
+				throw new CustomExceptions.ObjetoNoRegistrado("Usuario no registrado");
+			}
+			catch (CustomExceptions.NoHayRepositoriosRegistrados e) {
+				throw new CustomExceptions.NoHayRepositoriosRegistrados("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
+			}
 		}
 		else if(tipo == 1) {
 			if(bd.getListaRepositoriosRegistrados().contains(nombre)) {
 				sesion = getIdentificador();
 				bd.addId(nombre, sesion, 1);
-				System.out.println("Se ha logeado el repositorio " + nombre);
 			}
 			else
 				throw new RuntimeException ("Repositorio no registrado");
@@ -70,7 +84,6 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 
 	public int getIdSesion(String nombre, int tipo) throws RemoteException {
 		int identificador = -1;
-		Repositorio[] repos = null;
 		if(tipo == 0) {
 			if(bd.getListaClientesActivos().containsKey(nombre))
 				identificador = bd.getListaClientesActivos().get(nombre);
@@ -133,7 +146,11 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 		return identificador++;
 	}
 	
-	public boolean comprobarCliente (String nombre) throws RemoteException{
-		return bd.getListaClientesActivos().containsKey(nombre);
+	public boolean comprobarCliente (String nombre_cliente) throws RemoteException{
+		return bd.getListaClientesActivos().containsKey(nombre_cliente);
+	}
+	
+	public boolean comprobarRepositorio (String nombre_repositorio) throws RemoteException{
+		return bd.getListaRepositoriosLogueados().containsKey(nombre_repositorio);
 	}
 }

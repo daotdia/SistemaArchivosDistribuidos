@@ -18,6 +18,7 @@ public class Cliente {
 		int opcion = -1;
 		String nombre = "";
 		Scanner in = new Scanner(System.in);
+		boolean salir = false;
 		
 		ServicioDiscoClienteInterface sdc = new ServicioDiscoClienteImpl();
 		Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, 3434);
@@ -26,7 +27,7 @@ public class Cliente {
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("autenticacion_remota");
 		servicio_gestor = (ServicioGestorInterface) registry.lookup("sg_remoto");
 		
-		while(opcion != 3) {
+		while(!salir) {
 			System.out.println("Elige la opción de autenticacion");
 			System.out.println("1. Registrar usuario");
 			System.out.println("2. Iniciar sesion usuario");
@@ -37,20 +38,43 @@ public class Cliente {
 				case 1:
 					System.out.println("Indique el nombre del usuario");
 					nombre = in.nextLine();					
-					servicio_autenticacion.registrarObjeto(nombre, 0);
+					boolean registrado = servicio_autenticacion.registrarObjeto(nombre, 0);
+					if(registrado) {
+						System.out.println("Usuario con nombre " + nombre + " registrado");
+					}
+					else
+						System.out.println("Ya existe un cliente registrado con nombre " + nombre + " intentelo con otro nombre");
+					System.out.println("");
 					break;
 				case 2: 
+					try {
 					System.out.println("Indique el nombre del usuario");
 					nombre = in.nextLine();					
 					servicio_autenticacion.iniciarSesion(nombre, 0);
-					break;
-				case 3:
-					System.out.println("Gracias por usar el sistema, vuelve pronto!");
-					opcion = 3;
+					System.out.println("Usuario con nombre " + nombre + " conectado");
+					System.out.println("");
 					break;
 					}
+					catch (RuntimeException e) {
+						System.out.println("Cliente no regitrado, registrelo antes de intentar iniciar sesión");
+						System.out.println("");
+						break;
+					}
+					catch (Exception e) {
+						System.out.println("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
+						System.out.println("");
+						break;
+					}
+				case 3:
+					System.out.println("Gracias por usar el sistema, vuelve pronto!");
+					salir = true;
+					break;
+				default:
+					System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-3).");
+					break;
+			}
 			if(opcion == 2 && servicio_autenticacion.comprobarCliente(nombre)) {
-				while(opcion != 7 || opcion != 8 || opcion != 3) {
+				while(!salir) {
 					System.out.println("Elige la opción de gestión de archivos que considere");
 					System.out.println("1. Subir Archivo");
 					System.out.println("2. Bajar Archivo");
@@ -100,22 +124,28 @@ public class Cliente {
 					case 7:
 						servicio_autenticacion.cerrarSesion(nombre, 0);
 						System.out.println("Sesion cerrada del cliente " + nombre);
-						opcion = 7;
+						salir = true;
 						break;
 					case 8:
 						servicio_autenticacion.deleteObjeto(nombre, 0);
 						System.out.println("Cliente " + nombre + " eliminado");
-						opcion = 8;
+						salir = true;
 						break;
 					case 9:
 						servicio_autenticacion.cerrarSesion(nombre, 0);
 						System.out.println("Sesion cerrada del cliente " + nombre);
-						opcion = 3;
 						System.out.println("Gracias por usar el sistema, vuelve pronto!");
-						
+						salir = true;
+						break;
+					default:
+						System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-9).");
+						break;
 					}
 				}
 			}	
-		}		
+		}
+		registry.unbind("sdc_remoto");
+		UnicastRemoteObject.unexportObject(sdc, true);
+		in.close();
 	}
 }

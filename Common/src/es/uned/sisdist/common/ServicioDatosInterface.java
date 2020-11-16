@@ -4,7 +4,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public interface ServicioDatosInterface extends Remote{
 	
@@ -32,9 +31,11 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public List<MetaFichero> getListaFicheros (String nombre_cliente) throws RemoteException;
 	
+	public Repositorio getRepositorioFichero (String nombre_fichero, String nombre_cliente) throws RemoteException;
+	
 	public List<String> getListaClientesRepositorio (String nombre_repositorio) throws RemoteException;
 	
-	public HashMap<String, List<MetaFichero>> getListaRepositorioFicheros (String nombre_cliente) throws RemoteException;
+	public List<String> getListaFicherosCliente (String nombre_cliente) throws RemoteException;
 	
 	public List<String> getListaClientesRegistrados () throws RemoteException;
 	
