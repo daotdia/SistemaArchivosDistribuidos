@@ -1,12 +1,10 @@
 package es.uned.sisdist.servidor;
 
-import java.io.File;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -36,12 +34,13 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	public void subirFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception {
 		Repositorio repo = servicio_datos.getRepositoriosUsuario(nombre_cliente).get(new Random().nextInt(servicio_datos.getRepositoriosUsuario(nombre_cliente).size()));
 		System.out.println("Creando Fichero");
+		System.out.println("El objeto repositorio en getRepositoriosUsuario es: " +  repo.toString() + "con nombre " + repo.getNombre());
 		Fichero fichero = new Fichero(path_local, nombre_fichero, nombre_cliente);
 		System.out.println("Fichero creado");
-		servicio_datos.addMetaFichero(repo.getNombre(),new MetaFichero(fichero), nombre_cliente);
+		MetaFichero metafichero = new MetaFichero(fichero);
+		servicio_datos.addMetaFichero(repo.getNombre(), metafichero, nombre_cliente);
 		System.out.println("Tratando de iniciar subida");
 		sco.subirArchivo(fichero, repo, nombre_cliente, nombre_fichero);
-		
 	}
 
 	@Override
@@ -67,22 +66,10 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 
 	@Override
 	public void borrarFichero(String nombre_cliente, String nombre_fichero) throws RemoteException {
-		/* Repositorio repo;
-		boolean bandera = false;
-		HashMap<String,List<MetaFichero>> ficheros_usuario = servicio_datos.getListaRepositorioFicheros(nombre_cliente);
-		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.entrySet()) {
-			for(MetaFichero fichero : entrada.getValue()) {
-				if(fichero.getNombre().equals(nombre_fichero)) {
-					repo = servicio_datos.getRepositorioActivo(entrada.getKey());
-					sco.deleteArchivo(repo,nombre_fichero, nombre_cliente);
-					File file = new File(repo.getPath() + "/" + nombre_cliente + "/" + nombre_fichero);
-					file.delete();
-					bandera = true;
-				}
-			}
+		List<Repositorio> repositorios = servicio_datos.getRepositoriosFichero(nombre_fichero, nombre_cliente);
+		for(Repositorio repo : repositorios) {
+			sco.deleteArchivo(repo,nombre_fichero, nombre_cliente);
 		}
-		if (bandera == false) {
-			throw new RuntimeException ("Fichero de nombre " + nombre_fichero + " no encontrado");		} **/
 	}
 
 	@Override

@@ -1,6 +1,9 @@
 package es.uned.sisdist.servidor;
 
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +25,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	//HashMao para cada usuario, con sus repositorios activos linkados que tienen archivos.
 	private HashMap<String, HashMap<String,List<MetaFichero>>> ficheros_usuario;
 	
-	public ServicioDatosImpl () {
+	public ServicioDatosImpl () throws RemoteException {
 		usuarios_registrados = new ArrayList<String>();
 		repositorios_registrados = new ArrayList<String>();
 		usuarios_activos = new HashMap<String,Integer>();
@@ -60,7 +63,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	}
 
 	@Override
-	public Repositorio linkRepositorio(String nombre_cliente) throws CustomExceptions {
+	public Repositorio linkRepositorio(String nombre_cliente) throws CustomExceptions, RemoteException {
 		Repositorio repo;
 		if(!repositorios_logueados.isEmpty()) {
 			//Añado un repositorio aleatorio a la lista de repositorios del usuario.
@@ -73,6 +76,9 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 			if(!repositorios_activos.containsKey(nombre_repositorio)) { 				
 				repo = new Repositorio(nombre_repositorio);
 				repo.setId(repositorios_logueados.get(nombre_repositorio)); 
+				/*registry.rebind(
+						repo.getNombre(), 
+						(RepositorioInterface) UnicastRemoteObject.exportObject(repo, getPuerto()));**/
 				repositorios_activos.put(nombre_repositorio, repo);
 				System.out.println("Repositorio inicializado " + nombre_repositorio);
 			}
@@ -141,6 +147,22 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		return ficheros;
 	}
 
+	public List<Repositorio> getRepositoriosFichero(String nombre_fichero, String nombre_cliente) throws RemoteException {
+		List<Repositorio> repositorios = new ArrayList<Repositorio>();
+		System.out.println("El numero de repositorios activos son: " + repositorios_activos.size());
+		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_usuario.get(nombre_cliente).entrySet()) {
+			for(MetaFichero fichero : entrada.getValue()) {
+				if(fichero.getNombre().equals(nombre_fichero)) {
+					repositorios.add(repositorios_activos.get(entrada.getKey()));
+				}
+			}
+		}
+		if (repositorios.isEmpty()) {
+			throw new RuntimeException ("No se ha encontrado archivo a eliminar en nignún repositorio activo");
+		}
+		return repositorios;
+	}
+	
 	public List<String> getListaFicherosCliente (String nombre_cliente) throws RemoteException, RuntimeException {
 		List<String> nombres_ficheros = new ArrayList<String>();
 		String nombre_fichero;
@@ -236,4 +258,5 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		}
 		return nombre_ficheros;
 	}
+	
 }
