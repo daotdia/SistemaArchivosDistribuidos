@@ -80,4 +80,23 @@ public class CustomExceptions extends RuntimeException {
 	    }
 	}
 
+	public static class RepositorioTodaviaNoUtilizado extends CustomExceptions{
+		private static final long serialVersionUID = 1L;
+
+		public RepositorioTodaviaNoUtilizado () {
+			
+	    }
+
+	    public RepositorioTodaviaNoUtilizado (String message) {
+	        super (message);
+	    }
+
+	    public RepositorioTodaviaNoUtilizado (Throwable cause) {
+	        super (cause);
+	    }
+
+	    public RepositorioTodaviaNoUtilizado (String message, Throwable cause) {
+	        super (message, cause);
+	    }
+	}
 }

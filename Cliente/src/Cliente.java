@@ -5,6 +5,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
 import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 import es.uned.sisdist.common.ServicioGestorInterface;
@@ -18,7 +19,8 @@ public class Cliente {
 		int opcion = -1;
 		String nombre = "";
 		Scanner in = new Scanner(System.in);
-		boolean salir = false;
+		boolean salir_autenticacion = false;
+		boolean salir_archivos = false;
 		
 		ServicioDiscoClienteInterface sdc = new ServicioDiscoClienteImpl();
 		Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, 3434);
@@ -27,12 +29,18 @@ public class Cliente {
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("autenticacion_remota");
 		servicio_gestor = (ServicioGestorInterface) registry.lookup("sg_remoto");
 		
-		while(!salir) {
+		while(!salir_autenticacion) {
+			salir_archivos = false;
 			System.out.println("Elige la opción de autenticacion");
 			System.out.println("1. Registrar usuario");
 			System.out.println("2. Iniciar sesion usuario");
 			System.out.println("3. Exit");
-			opcion = in.nextInt();
+			try {
+				opcion = in.nextInt();
+			}
+			catch (Exception e) {
+				opcion = 1000;
+			}
 			in.nextLine();
 			switch(opcion) {
 				case 1:
@@ -55,26 +63,25 @@ public class Cliente {
 					System.out.println("");
 					break;
 					}
-					catch (RuntimeException e) {
-						System.out.println("Cliente no regitrado, registrelo antes de intentar iniciar sesión");
-						System.out.println("");
-						break;
+					catch (CustomExceptions.NoHayRepositoriosLibres e) {
+						throw new CustomExceptions.NoHayRepositoriosLibres("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
 					}
-					catch (Exception e) {
-						System.out.println("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
-						System.out.println("");
-						break;
+					catch (CustomExceptions.ObjetoNoRegistrado e) {
+						throw new CustomExceptions.ObjetoNoRegistrado("Usuario no registrado");
+					}
+					catch (CustomExceptions.NoHayRepositoriosRegistrados e) {
+						throw new CustomExceptions.NoHayRepositoriosRegistrados("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
 					}
 				case 3:
 					System.out.println("Gracias por usar el sistema, vuelve pronto!");
-					salir = true;
+					salir_autenticacion = true;
 					break;
 				default:
 					System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-3).");
 					break;
 			}
 			if(opcion == 2 && servicio_autenticacion.comprobarCliente(nombre)) {
-				while(!salir) {
+				while(!salir_archivos) {
 					System.out.println("Elige la opción de gestión de archivos que considere");
 					System.out.println("1. Subir Archivo");
 					System.out.println("2. Bajar Archivo");
@@ -83,9 +90,15 @@ public class Cliente {
 					System.out.println("5. Listar tus ficheros");
 					System.out.println("6. Listar clientes del sistema");
 					System.out.println("7. Cerrar Sesion");
-					System.out.println("8. Eliminar perfil");
+					System.out.println("8. Cerrar sesión y eliminar perfil");
 					System.out.println("9. Cerrar sesion y salir");
-					int opcion_gestion = in.nextInt();
+					int opcion_gestion = -1;
+					try {
+						opcion_gestion = in.nextInt();
+					}
+					catch (Exception e) {
+						opcion_gestion = 1000;
+					}
 					in.nextLine();
 					String path = null;
 					String nombre_fichero = null;
@@ -124,18 +137,20 @@ public class Cliente {
 					case 7:
 						servicio_autenticacion.cerrarSesion(nombre, 0);
 						System.out.println("Sesion cerrada del cliente " + nombre);
-						salir = true;
+						salir_archivos = true;
 						break;
 					case 8:
 						servicio_autenticacion.deleteObjeto(nombre, 0);
 						System.out.println("Cliente " + nombre + " eliminado");
-						salir = true;
+						System.out.println("Gracias por usar el sistema, vuelve pronto!");
+						salir_archivos = true;
 						break;
 					case 9:
 						servicio_autenticacion.cerrarSesion(nombre, 0);
 						System.out.println("Sesion cerrada del cliente " + nombre);
 						System.out.println("Gracias por usar el sistema, vuelve pronto!");
-						salir = true;
+						salir_archivos = true;
+						salir_autenticacion = true;
 						break;
 					default:
 						System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-9).");

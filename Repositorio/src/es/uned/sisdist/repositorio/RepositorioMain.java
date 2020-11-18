@@ -7,6 +7,7 @@ import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
 import es.uned.sisdist.common.ServicioGestorInterface;
 
@@ -28,7 +29,12 @@ public class RepositorioMain {
 			System.out.println("1. Registrar repositorio");
 			System.out.println("2. Iniciar sesion repositorio");
 			System.out.println("3. Exit");
+			try {
 			opcion = in.nextInt();
+			}
+			catch (Exception e) {
+				opcion = 1000;
+			}
 			in.nextLine();
 			switch(opcion) {
 				case 1:
@@ -73,7 +79,12 @@ public class RepositorioMain {
 					System.out.println("3. Cerrar Sesion");
 					System.out.println("4. Cerrar sesion y salir");
 					System.out.println("5. Eliminar Repositorio y salir");
-					opcion = in.nextInt();
+					try {
+						opcion = in.nextInt();
+					}
+					catch (Exception e) {
+						opcion = 1000;
+					}
 					in.nextLine();
 					switch(opcion) {
 						case 1: 
@@ -115,6 +126,7 @@ public class RepositorioMain {
 							System.out.println("");
 							break;
 						case 5:
+							try {
 							servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
 							System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
 							servicio_autenticacion.deleteObjeto(nombre_repositorio, 1);
@@ -123,6 +135,12 @@ public class RepositorioMain {
 							salir = true;
 							System.out.println("");
 							break;
+							} catch (CustomExceptions.RepositorioTodaviaNoUtilizado e) {
+								System.out.println("Repositorio eliminado antes de haber sido utilizado, no se han producido cambios en el sistema");
+							}
+							catch (CustomExceptions.ObjetoNoRegistrado e) {
+								System.out.println("No se puede eliminar un objeto no registrado");
+							}
 						default:
 							System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-5).");
 							System.out.println("");

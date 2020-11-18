@@ -1,7 +1,0 @@
-package es.uned.sisdist.common;
-
-import java.rmi.Remote;
-
-public interface IServidor extends Remote{
-
-}

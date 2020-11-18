@@ -69,6 +69,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 		List<Repositorio> repositorios = servicio_datos.getRepositoriosFichero(nombre_fichero, nombre_cliente);
 		for(Repositorio repo : repositorios) {
 			sco.deleteArchivo(repo,nombre_fichero, nombre_cliente);
+			servicio_datos.deleteFicheroCliente(nombre_cliente, repo.getNombre(), nombre_fichero);
 		}
 	}
 

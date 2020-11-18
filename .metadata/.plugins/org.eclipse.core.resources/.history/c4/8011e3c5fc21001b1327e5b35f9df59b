@@ -1,5 +1,0 @@
-import es.uned.sisdist.common.ServidorInterface;
-
-public class Cliente {
-	private static ServidorInterface servidor;
-}

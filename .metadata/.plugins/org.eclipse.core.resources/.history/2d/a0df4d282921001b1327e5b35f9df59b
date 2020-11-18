@@ -1,5 +1,0 @@
-package es.uned.sisdist.repositorio;
-
-public interface ServicioSrOperadorInterface {
-	
-}

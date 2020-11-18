@@ -105,7 +105,7 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 		if(tipo == 0) {
 			if(bd.getListaClientesRegistrados().contains(nombre)) {
 				for (Repositorio repo : bd.getRepositoriosUsuario(nombre)) {
-					sg.borrarCarpeta(repo, nombre);
+					sg.borrarCarpetaCliente(repo, nombre);
 				}
 				bd.deleteCliente(nombre);
 			}
@@ -113,10 +113,24 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 				throw new RuntimeException ("Cliente no registrado");
 		}
 		if(tipo==1) {
-			if(bd.getListaRepositoriosRegistrados().contains(nombre))
+			try {
+			if(bd.getListaRepositoriosRegistrados().contains(nombre)) {
 				bd.deleteRepositorio(nombre);
+				if(bd.getRepositorioActivo(nombre) != null) {
+					sg.borrarCarpetaRepositorio(bd.getRepositorioActivo(nombre).getNombre());
+				}
+				else
+					throw new CustomExceptions.RepositorioTodaviaNoUtilizado("RepositorioTodaviaNoUtilizado");
+			}
 			else
-				throw new RuntimeException ("Repositorio no registrado");
+				throw new CustomExceptions.ObjetoNoRegistrado("Repositorio no registrado");
+			}
+			catch (CustomExceptions.RepositorioTodaviaNoUtilizado e) {
+				throw new CustomExceptions.RepositorioTodaviaNoUtilizado("RepositorioTodaviaNoUtilizado");
+			}
+			catch (CustomExceptions.ObjetoNoRegistrado e){
+				throw new CustomExceptions.ObjetoNoRegistrado("Repositorio no registrado");
+			}
 		}
 	}
 	
@@ -126,6 +140,7 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 			if(bd.getListaClientesActivos().containsKey(nombre)) {
 				identificador = bd.getListaClientesActivos().get(nombre);
 				bd.getListaClientesActivos().remove(nombre);
+				bd.unlinkRepositorio(nombre);
 			}
 			else 
 				throw new RuntimeException ("Cliente no logueado");

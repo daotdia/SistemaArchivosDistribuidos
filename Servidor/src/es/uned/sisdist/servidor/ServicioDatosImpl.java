@@ -6,6 +6,7 @@ import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +45,12 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	}
 
 	public void deleteCliente(String nombre) throws RemoteException {
-		usuarios_registrados.remove(usuarios_registrados.indexOf(nombre));
+		Iterator<String> it = usuarios_registrados.iterator();
+		while(it.hasNext()) {
+			if(it.next().equals(nombre)) {
+				it.remove();
+			}
+		}
 		unlinkRepositorio(nombre);
 	}
 
@@ -257,6 +263,16 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 			nombre_ficheros.add(fichero.getNombre());
 		}
 		return nombre_ficheros;
+	}
+	
+	public void deleteFicheroCliente(String nombre_cliente,String nombre_repo, String nombre_fichero) throws RemoteException{
+		List<MetaFichero> ficheros = ficheros_usuario.get(nombre_cliente).get(nombre_repo);
+		Iterator<MetaFichero> it = ficheros.iterator();
+		while(it.hasNext()) {
+			if(it.next().getNombre().equals(nombre_fichero)) {
+				it.remove();
+			}
+		}
 	}
 	
 }

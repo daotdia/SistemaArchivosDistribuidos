@@ -28,8 +28,29 @@ public class ServicioSrOperadorImpl implements ServicioSrOperadorInterface {
 	}
 
 	@Override
-	public void borrarCarpeta(Repositorio repo, String nombre_cliente) throws RemoteException {
+	public void borrarCarpetaCliente(Repositorio repo, String nombre_cliente) throws RemoteException {
 		File directorio=new File(repo.getPath() + "/" + nombre_cliente);
+		if(directorio.listFiles().length != 0) {
+			for(File file : directorio.listFiles()) {
+				file.delete();
+			}
+		}
+		directorio.delete();
+		System.out.println("Carpeta eleminada en path " + directorio);
+	}
+	
+	public void borrarCarpetaRepositorio(String path) throws RemoteException {
+		File directorio=new File(path);
+		if(directorio.listFiles() != null && directorio.listFiles().length != 0) {
+			for(File hijo : directorio.listFiles()) {
+				if(hijo.listFiles() != null && hijo.listFiles().length != 0) {
+					for (File nieto : hijo.listFiles()) {
+						nieto.delete();
+					}
+				}
+				hijo.delete();
+			}
+		}
 		directorio.delete();
 		System.out.println("Carpeta eleminada en path " + directorio);
 	}

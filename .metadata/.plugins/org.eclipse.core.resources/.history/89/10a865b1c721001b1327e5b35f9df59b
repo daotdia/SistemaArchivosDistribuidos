@@ -1,5 +1,0 @@
-package es.uned.sisdist.common;
-
-public interface RepositorioInt {
-
-}

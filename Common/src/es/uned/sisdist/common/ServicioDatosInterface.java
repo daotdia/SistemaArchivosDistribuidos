@@ -56,4 +56,6 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public List<String> getFicherosClienteRepositorio(String nombre_cliente, String nombre_repositorio) throws RemoteException;
 	
+	public void deleteFicheroCliente(String nombre_cliente,String nombre_repo, String nombre_fichero) throws RemoteException;
+	
 }
