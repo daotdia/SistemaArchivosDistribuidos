@@ -26,9 +26,9 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	public ServicioGestorImpl () throws RemoteException, NotBoundException {
 		registry =  LocateRegistry.getRegistry(7777);
 		
-		servicio_datos = (ServicioDatosInterface) registry.lookup("datos_remotos"); 
-		sso = (ServicioSrOperadorInterface) registry.lookup("sso_remoto");
-		sco = (ServicioClOperadorInterface) registry.lookup("sco_remoto");
+		servicio_datos = (ServicioDatosInterface) registry.lookup("rmi://"+ Servidor.ip + ":8888/datos_remotos/1"); 
+		sso = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ Servidor.ip + ":5555/sso_remoto/1");
+		sco = (ServicioClOperadorInterface) registry.lookup("rmi://"+ Servidor.ip + ":2222/sco_remoto/1");
 	}
 	@Override
 	public void subirFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception {

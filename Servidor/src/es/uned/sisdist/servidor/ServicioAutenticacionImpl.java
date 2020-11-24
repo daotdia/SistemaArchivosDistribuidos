@@ -20,8 +20,8 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 	
 	public ServicioAutenticacionImpl() throws Exception {
 		registry = LocateRegistry.getRegistry(7777);
-		ServicioAutenticacionImpl.bd = (ServicioDatosInterface) registry.lookup("datos_remotos");
-		ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("sso_remoto");
+		ServicioAutenticacionImpl.bd = (ServicioDatosInterface) registry.lookup("rmi://"+ Servidor.ip + ":8888/datos_remotos/1"); 
+		ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ Servidor.ip + ":5555/sso_remoto/1");;
 	}
 	
 	public boolean registrarObjeto(String nombre, int tipo) throws RemoteException {

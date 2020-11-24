@@ -59,7 +59,7 @@ public class ServicioSrOperadorImpl implements ServicioSrOperadorInterface {
 	//nombre en varios repositorios.
 	@Override
 	public void bajarFichero(Repositorio repo, String nombre_fichero, String path_local, String nombre_cliente) throws RemoteException, Exception {
-		dc = (ServicioDiscoClienteInterface) registry.lookup("sdc_remoto");
+		dc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ Servidor.ip + ":3434/sdc_remoto/1");
 		dc.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
 	}
 
