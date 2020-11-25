@@ -1,10 +1,12 @@
 package es.uned.sisdist.servidor;
 
 import java.io.File;
+import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 
+import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.Repositorio;
 import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 import es.uned.sisdist.common.ServicioSrOperadorInterface;
@@ -13,10 +15,13 @@ public class ServicioSrOperadorImpl implements ServicioSrOperadorInterface {
 
 	private ServicioDiscoClienteInterface dc;
 	private Registry registry;
+	private String ip;
 	
 	
 	public ServicioSrOperadorImpl() throws Exception{
 		registry = LocateRegistry.getRegistry(7777);
+		InetAddress IP=InetAddress.getLocalHost();
+		ip = IP.getHostAddress();
 	}
 	
 	@Override
@@ -40,26 +45,30 @@ public class ServicioSrOperadorImpl implements ServicioSrOperadorInterface {
 	}
 	
 	public void borrarCarpetaRepositorio(String path) throws RemoteException {
-		File directorio=new File(path);
-		if(directorio.listFiles() != null && directorio.listFiles().length != 0) {
-			for(File hijo : directorio.listFiles()) {
-				if(hijo.listFiles() != null && hijo.listFiles().length != 0) {
-					for (File nieto : hijo.listFiles()) {
-						nieto.delete();
+		try {
+			File directorio=new File(path);
+			if(directorio.listFiles() != null && directorio.listFiles().length != 0) {
+				for(File hijo : directorio.listFiles()) {
+					if(hijo.listFiles() != null && hijo.listFiles().length != 0) {
+						for (File nieto : hijo.listFiles()) {
+							nieto.delete();
+						}
 					}
+					hijo.delete();
 				}
-				hijo.delete();
 			}
+			directorio.delete();
+			System.out.println("Carpeta eleminada en path " + directorio);
+		} catch (Exception e) {
+			throw new CustomExceptions.RepositorioTodaviaNoUtilizado("RepositorioTodaviaNoUtilizado");
 		}
-		directorio.delete();
-		System.out.println("Carpeta eleminada en path " + directorio);
 	}
 
 	//Baja todos los archivos del nombre indicado, serán varios en el caso de que se encuentren archivos del mismo
 	//nombre en varios repositorios.
 	@Override
 	public void bajarFichero(Repositorio repo, String nombre_fichero, String path_local, String nombre_cliente) throws RemoteException, Exception {
-		dc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ Servidor.ip + ":3434/sdc_remoto/1");
+		dc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/1");
 		dc.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
 	}
 

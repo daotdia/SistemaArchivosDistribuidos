@@ -1,5 +1,7 @@
 package es.uned.sisdist.servidor;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.Fichero;
 import es.uned.sisdist.common.MetaFichero;
 import es.uned.sisdist.common.Repositorio;
@@ -23,18 +26,32 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	private static ServicioClOperadorInterface sco;
 	private static Registry registry;
 	
-	public ServicioGestorImpl () throws RemoteException, NotBoundException {
+	public ServicioGestorImpl () throws RemoteException, NotBoundException, UnknownHostException {
 		registry =  LocateRegistry.getRegistry(7777);
 		
-		servicio_datos = (ServicioDatosInterface) registry.lookup("rmi://"+ Servidor.ip + ":8888/datos_remotos/1"); 
-		sso = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ Servidor.ip + ":5555/sso_remoto/1");
-		sco = (ServicioClOperadorInterface) registry.lookup("rmi://"+ Servidor.ip + ":2222/sco_remoto/1");
+		InetAddress IP=InetAddress.getLocalHost();
+		String ip = IP.getHostAddress();
+		
+		servicio_datos = (ServicioDatosInterface) registry.lookup("rmi://"+ ip + ":8888/datos_remotos/1"); 
+		sso = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/1");
+		sco = (ServicioClOperadorInterface) registry.lookup("rmi://"+ ip + ":2222/sco_remoto/1");
 	}
 	@Override
 	public void subirFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception {
-		Repositorio repo = servicio_datos.getRepositoriosUsuario(nombre_cliente).get(new Random().nextInt(servicio_datos.getRepositoriosUsuario(nombre_cliente).size()));
+		Repositorio repo;
+		if(!servicio_datos.getRepositoriosUsuario(nombre_cliente).isEmpty()) {
+			repo = servicio_datos.getRepositoriosUsuario(nombre_cliente).get(new Random().nextInt(servicio_datos.getRepositoriosUsuario(nombre_cliente).size()));
+		}
+		else {
+			try {
+				servicio_datos.linkRepositorio(nombre_cliente);
+				repo = servicio_datos.getRepositoriosUsuario(nombre_cliente).get(new Random().nextInt(servicio_datos.getRepositoriosUsuario(nombre_cliente).size()));
+				sso.crearCarpeta(repo.getPath(), nombre_cliente);
+			} catch (Exception e) {
+				throw new CustomExceptions.NoHayRepositoriosLibres("No hay repositorios disponibles para linkar al usuario, inicializar nuevos");
+			}
+		}
 		System.out.println("Creando Fichero");
-		System.out.println("El objeto repositorio en getRepositoriosUsuario es: " +  repo.toString() + "con nombre " + repo.getNombre());
 		Fichero fichero = new Fichero(path_local, nombre_fichero, nombre_cliente);
 		System.out.println("Fichero creado");
 		MetaFichero metafichero = new MetaFichero(fichero);

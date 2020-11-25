@@ -55,8 +55,14 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	}
 
 	public void deleteRepositorio(String nombre) throws RemoteException {
-		//Mantengo el repositorio activo por si durante la sesión el cliente quiere hacer algo más con él.
+		repositorios_activos.remove(nombre);
 		repositorios_registrados.remove(repositorios_registrados.indexOf(nombre));
+		for (Map.Entry<String, List<String>> entrada : repositorio_usuario.entrySet()) {
+			List<String> repos = entrada.getValue();
+			if(repos.contains(nombre)) {
+				repos.remove(nombre);
+			}
+		}
 	}
 
 	//Para añadir repositorio o usuario al Map de activos.
@@ -82,9 +88,6 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 			if(!repositorios_activos.containsKey(nombre_repositorio)) { 				
 				repo = new Repositorio(nombre_repositorio);
 				repo.setId(repositorios_logueados.get(nombre_repositorio)); 
-				/*registry.rebind(
-						repo.getNombre(), 
-						(RepositorioInterface) UnicastRemoteObject.exportObject(repo, getPuerto()));**/
 				repositorios_activos.put(nombre_repositorio, repo);
 				System.out.println("Repositorio inicializado " + nombre_repositorio);
 			}
@@ -273,6 +276,14 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 				it.remove();
 			}
 		}
+	}
+	
+	public void cerrarSesionCliente (String nombre) throws RemoteException {
+		usuarios_activos.remove(nombre);
+	}
+	
+	public void cerraSesionRepositorio (String nombre) throws RemoteException {
+		repositorios_logueados.remove(nombre);
 	}
 	
 }

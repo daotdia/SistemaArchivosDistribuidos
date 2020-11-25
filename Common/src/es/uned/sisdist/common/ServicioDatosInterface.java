@@ -58,4 +58,7 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public void deleteFicheroCliente(String nombre_cliente,String nombre_repo, String nombre_fichero) throws RemoteException;
 	
+	public void cerrarSesionCliente (String nombre) throws RemoteException;
+	
+	public void cerraSesionRepositorio (String nombre) throws RemoteException;
 }

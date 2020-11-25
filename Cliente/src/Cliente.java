@@ -1,3 +1,4 @@
+import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Arrays;
@@ -11,19 +12,23 @@ public class Cliente {
 	private static ServicioGestorInterface servicio_gestor;
 	
 	public static void main (String [] args) throws Exception {
-		System.out.println("Se encuentra en la sesión del usuario " + args[0]);
-		System.out.println("");
+		InetAddress IP=InetAddress.getLocalHost();
+		String ip = IP.getHostAddress();
 		
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		
-		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ AutenticacionCliente.ip + ":6666/autenticacion_remota/1");
-		servicio_gestor = (ServicioGestorInterface) registry.lookup("rmi://"+ AutenticacionCliente.ip + ":2323/sg_remoto/1");
+		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
+		servicio_gestor = (ServicioGestorInterface) registry.lookup("rmi://"+ ip + ":2323/sg_remoto/1");
 		
 		String nombre = args[0];
 		boolean salir_archivos = false;
 		Scanner in = new Scanner(System.in);
 		
 		if(servicio_autenticacion.comprobarCliente(nombre)) {
+			System.out.println("");
+			System.out.println("Se encuentra en la sesión del usuario " + args[0]);
+			System.out.println("");
+			
 			while(!salir_archivos) {
 				System.out.println("Elige la opción de gestión de archivos que considere");
 				System.out.println("1. Subir Archivo");
@@ -32,9 +37,8 @@ public class Cliente {
 				System.out.println("4. Compartir Fichero");
 				System.out.println("5. Listar tus ficheros");
 				System.out.println("6. Listar clientes del sistema");
-				System.out.println("7. Cerrar Sesion");
-				System.out.println("8. Cerrar sesión y eliminar perfil");
-				System.out.println("9. Cerrar sesion y salir");
+				System.out.println("7. Cerrar Sesion y salir");
+				System.out.println("8. Cerrar sesión, eliminar perfil y salir");
 				int opcion_gestion = -1;
 				try {
 					opcion_gestion = in.nextInt();
@@ -83,14 +87,9 @@ public class Cliente {
 					salir_archivos = true;
 					break;
 				case 8:
+					servicio_autenticacion.cerrarSesion(nombre, 0);
 					servicio_autenticacion.deleteObjeto(nombre, 0);
 					System.out.println("Cliente " + nombre + " eliminado");
-					System.out.println("Gracias por usar el sistema, vuelve pronto!");
-					salir_archivos = true;
-					break;
-				case 9:
-					servicio_autenticacion.cerrarSesion(nombre, 0);
-					System.out.println("Sesion cerrada del cliente " + nombre);
 					System.out.println("Gracias por usar el sistema, vuelve pronto!");
 					salir_archivos = true;
 					break;

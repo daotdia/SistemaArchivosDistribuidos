@@ -18,10 +18,18 @@ public class Repositorio {
 	private static ServicioGestorInterface servicio_gestor; 
 	
 	public static void main (String [] args) throws RemoteException, NotBoundException, UnknownHostException {
+		System.out.println("");
+		System.out.println("Se encuentra en la sesión del usuario " + args[0]);
+		System.out.println("");
+		
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		
-		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ AutenticacionRepositorio.ip + ":6666/autenticacion_remota/1");
-		servicio_gestor = (ServicioGestorInterface) registry.lookup("rmi://"+ AutenticacionRepositorio.ip + ":2323/sg_remoto/1");
+		InetAddress IP=InetAddress.getLocalHost();
+		String ip = IP.getHostAddress();
+		
+		
+		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
+		servicio_gestor = (ServicioGestorInterface) registry.lookup("rmi://"+ ip + ":2323/sg_remoto/1");
 		
 		String nombre_repositorio = args[0];
 		Scanner in = new Scanner(System.in);
@@ -34,9 +42,8 @@ public class Repositorio {
 				System.out.println("Elige la operación de repositorio");
 				System.out.println("1. Listar clientes");
 				System.out.println("2. Listar ficheros del cliente");
-				System.out.println("3. Cerrar Sesion");
-				System.out.println("4. Cerrar sesion y salir");
-				System.out.println("5. Eliminar Repositorio y salir");
+				System.out.println("3. Cerrar sesion y salir");
+				System.out.println("4. Eliminar Repositorio, cerrar sesión y salir");
 				try {
 					opcion = in.nextInt();
 				}
@@ -74,16 +81,11 @@ public class Repositorio {
 					case 3:
 						servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
 						System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
-						System.out.println("");
-						break;
-					case 4:
-						servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
-						System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
 						salir = true;
 						System.out.println("Gracias por usar el sistema, vuelve pronto!");
 						System.out.println("");
 						break;
-					case 5:
+					case 4:
 						try {
 						servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
 						System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
@@ -95,16 +97,22 @@ public class Repositorio {
 						break;
 						} catch (CustomExceptions.RepositorioTodaviaNoUtilizado e) {
 							System.out.println("Repositorio eliminado antes de haber sido utilizado, no se han producido cambios en el sistema");
+							salir = true;
+							break;
 						}
 						catch (CustomExceptions.ObjetoNoRegistrado e) {
 							System.out.println("No se puede eliminar un objeto no registrado");
+							salir = true;
+							break;
 						}
 					default:
-						System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-5).");
+						System.out.println("No ha elegido una opción correcta, indique el número de la opción que le interese (1-4).");
 						System.out.println("");
 						break;	
 				}
 			}	
+		} else {
+			System.out.println("Este repositorio no está conectado, conectelo antes en el menu de autenticación");
 		}
 		in.close();
 	}

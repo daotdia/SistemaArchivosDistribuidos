@@ -1,5 +1,6 @@
 package es.uned.sisdist.servidor;
 
+import java.net.InetAddress;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -20,8 +21,12 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 	
 	public ServicioAutenticacionImpl() throws Exception {
 		registry = LocateRegistry.getRegistry(7777);
-		ServicioAutenticacionImpl.bd = (ServicioDatosInterface) registry.lookup("rmi://"+ Servidor.ip + ":8888/datos_remotos/1"); 
-		ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ Servidor.ip + ":5555/sso_remoto/1");;
+		
+		InetAddress IP=InetAddress.getLocalHost();
+		String ip = IP.getHostAddress();
+		
+		ServicioAutenticacionImpl.bd = (ServicioDatosInterface) registry.lookup("rmi://"+ ip + ":8888/datos_remotos/1"); 
+		ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/1");;
 	}
 	
 	public boolean registrarObjeto(String nombre, int tipo) throws RemoteException {
@@ -115,12 +120,8 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 		if(tipo==1) {
 			try {
 			if(bd.getListaRepositoriosRegistrados().contains(nombre)) {
+				sg.borrarCarpetaRepositorio(bd.getRepositorioActivo(nombre).getPath());
 				bd.deleteRepositorio(nombre);
-				if(bd.getRepositorioActivo(nombre) != null) {
-					sg.borrarCarpetaRepositorio(bd.getRepositorioActivo(nombre).getNombre());
-				}
-				else
-					throw new CustomExceptions.RepositorioTodaviaNoUtilizado("RepositorioTodaviaNoUtilizado");
 			}
 			else
 				throw new CustomExceptions.ObjetoNoRegistrado("Repositorio no registrado");
@@ -131,15 +132,17 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 			catch (CustomExceptions.ObjetoNoRegistrado e){
 				throw new CustomExceptions.ObjetoNoRegistrado("Repositorio no registrado");
 			}
+			catch (NullPointerException e) {
+				bd.deleteRepositorio(nombre);
+				throw new CustomExceptions.RepositorioTodaviaNoUtilizado("El repositorio todavía no ha sido linkado a ningún cliente");
+			}
 		}
 	}
 	
-	public int cerrarSesion(String nombre, int tipo) throws RemoteException {
-		int identificador = -1;
+	public void cerrarSesion(String nombre, int tipo) throws RemoteException {
 		if(tipo==0) {
 			if(bd.getListaClientesActivos().containsKey(nombre)) {
-				identificador = bd.getListaClientesActivos().get(nombre);
-				bd.getListaClientesActivos().remove(nombre);
+				bd.cerrarSesionCliente(nombre);
 				bd.unlinkRepositorio(nombre);
 			}
 			else 
@@ -147,14 +150,11 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 		}
 		if(tipo==1) {
 			if(bd.getListaRepositoriosLogueados().containsKey(nombre)) {
-				bd.getListaRepositoriosLogueados().remove(nombre);
-				if(bd.getListaRepositoriosActivos().containsKey(nombre))
-					bd.getListaRepositoriosActivos().remove(nombre);
+				bd.cerraSesionRepositorio(nombre);
 			}
 			else 
 				throw new RuntimeException ("Repositorio no logueado");
 		}
-		return identificador;
 	}
 
 	public static int getIdentificador() {
