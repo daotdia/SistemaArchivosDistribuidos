@@ -68,9 +68,9 @@ public class AutenticacionRepositorio {
 						System.out.println("");
 						break;
 					}
-					Process proc = Runtime.getRuntime().exec("java -jar Repositorio.jar " + nombre_repositorio);
-					InputStream input = proc.getInputStream();
-					InputStream err = proc.getErrorStream();
+					String [] array = new String[1];
+					array[0] = nombre_repositorio;
+					Repositorio.main(array);
 					break;
 				case 3:
 					System.out.println("");

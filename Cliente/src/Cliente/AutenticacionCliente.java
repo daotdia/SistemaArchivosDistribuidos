@@ -1,5 +1,6 @@
-import java.io.InputStream;
+package Cliente;
 import java.net.InetAddress;
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -12,22 +13,29 @@ import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 
 public class AutenticacionCliente {
 	private static ServicioAutenticacionInterface servicio_autenticacion;
-	public static String ip;
+	private static int port = 2100;
+	private static boolean primero = true;
 	
 	public static void main(String[] args) throws Exception {
 		InetAddress IP=InetAddress.getLocalHost();
-		ip = IP.getHostAddress();
+		String ip = IP.getHostAddress();
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		
 		int opcion = -1;
 		String nombre = "";
+		ServicioDiscoClienteInterface sdc;
 		
 		Scanner in = new Scanner(System.in);
-		boolean salir_autenticacion = false;
-		
-		ServicioDiscoClienteInterface sdc = new ServicioDiscoClienteImpl();
-		Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, 3434);
-		registry.rebind("rmi://"+ ip + ":3434/sdc_remoto/1", sdc_remoto);
+		boolean salir_autenticacion = false;	
+
+		try {
+			sdc = new ServicioDiscoClienteImpl();
+			Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, getPort());
+			registry.rebind("rmi://"+ ip + ":3434/sdc_remoto/1" , sdc_remoto);
+			primero = false;
+		} catch (Exception e) {
+			sdc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/1");
+		}
 		
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
 		
@@ -74,9 +82,7 @@ public class AutenticacionCliente {
 						}
 						String [] array = new String[1];
 						array[0] = nombre;
-						Process proc = Runtime.getRuntime().exec("java -jar Cliente.jar " + nombre);
-						InputStream input = proc.getInputStream();
-						InputStream err = proc.getErrorStream();
+						Cliente.main(array);
 						break;
 					case 3:
 						System.out.println("Gracias por usar el sistema, vuelve pronto!");
@@ -87,8 +93,13 @@ public class AutenticacionCliente {
 						break;
 				}
 			}
+		
 		registry.unbind("rmi://"+ ip + ":3434/sdc_remoto/1");
 		UnicastRemoteObject.unexportObject(sdc, true);
 		in.close();
+	}
+	public static int getPort() {
+		port++;
+		return port;
 	}
 }

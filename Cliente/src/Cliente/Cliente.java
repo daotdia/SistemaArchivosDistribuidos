@@ -1,3 +1,4 @@
+package Cliente;
 import java.net.InetAddress;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -23,7 +24,6 @@ public class Cliente {
 		String nombre = args[0];
 		boolean salir_archivos = false;
 		Scanner in = new Scanner(System.in);
-		
 		if(servicio_autenticacion.comprobarCliente(nombre)) {
 			System.out.println("");
 			System.out.println("Se encuentra en la sesión del usuario " + args[0]);
