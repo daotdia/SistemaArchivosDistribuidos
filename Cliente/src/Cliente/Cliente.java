@@ -5,6 +5,7 @@ import java.rmi.registry.Registry;
 import java.util.Arrays;
 import java.util.Scanner;
 
+import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
 import es.uned.sisdist.common.ServicioGestorInterface;
 
@@ -56,39 +57,70 @@ public class Cliente {
 					path = in.nextLine();
 					System.out.println("Indique el nombre del archivo");
 					nombre_fichero = in.nextLine();
-					servicio_gestor.subirFichero(nombre, nombre_fichero, path);
+					try {
+						servicio_gestor.subirFichero(nombre, nombre_fichero, path);
+					}
+					catch (CustomExceptions.NoHayRepositoriosLibres e){
+						System.out.println("No hay repositorios libres para el usuario inicialice nuevos");
+						break;
+					}
 					break;
 				case 2: 
 					//Bajar ficheor en path indicado
 					System.out.println("Indique el nombre del archivo a bajar");
 					nombre_fichero = in.nextLine();
 					System.out.println("Indique el path local donde bajar el archivo");
-					path = in.nextLine();					
+					path = in.nextLine();		
+					try {
 					servicio_gestor.bajarFichero(nombre, nombre_fichero, path);
+					} catch (RuntimeException e) {
+						System.out.println("Fichero con nombre " + nombre_fichero + " no encontrado, compruebelo y pruebe otra vez");
+						break;
+					}
 					break;
 				case 3:
 					System.out.println("Indique el nombre del archivo a borrar");
 					nombre_fichero = in.nextLine();
+					try {
 					servicio_gestor.borrarFichero(nombre, nombre_fichero);
+					}catch (CustomExceptions.PermisoDenegado e){
+						System.out.println("No tienes permiso para borrar el archivo " + nombre_fichero + " no eres el propietario");
+						break;
+					} 
+					catch(Exception e) {
+						System.out.println("Archivo " + nombre_fichero + " no eliminado, asegurase de que el nombre del archivo sea correcto");
+						break;
+					}
+					
 					break;
 				case 4:
+					System.out.println("Indique el nombre del archivo que quiere compartir, debe de ser propietario");
+					nombre_fichero = in.nextLine();
+					System.out.println("Indique el nombre del usuario con el que compartir el archivo");
+					String nombre_destinatario = in.nextLine();
+					try {
+					servicio_gestor.compartirFichero(nombre, nombre_destinatario, nombre_fichero);
+					} catch (CustomExceptions.PermisoDenegado e) {
+						System.out.println("No es el propietario del archivo " + nombre_fichero + ", no puede compartirlo");
+					}
 					break;
 				case 5:
 					System.out.println("Los ficheros del cliente " + nombre + " son:");
 					System.out.println(Arrays.toString(servicio_gestor.getListaFicheros(nombre).toArray()));
 					break;
 				case 6:
-					System.out.println("Los clientes con archivos en el sistema actualmente son:");
+					System.out.println("Los clientes registrados en el sistema actualmente son:");
 					System.out.println(Arrays.toString(servicio_gestor.getListaClientesSistema().toArray()));
 					break;
 				case 7:
 					servicio_autenticacion.cerrarSesion(nombre, 0);
 					System.out.println("Sesion cerrada del cliente " + nombre);
+					System.out.println("Gracias por usar el sistema, vuelve pronto!");
 					salir_archivos = true;
 					break;
 				case 8:
-					servicio_autenticacion.cerrarSesion(nombre, 0);
 					servicio_autenticacion.deleteObjeto(nombre, 0);
+					servicio_autenticacion.cerrarSesion(nombre, 0);
 					System.out.println("Cliente " + nombre + " eliminado");
 					System.out.println("Gracias por usar el sistema, vuelve pronto!");
 					salir_archivos = true;

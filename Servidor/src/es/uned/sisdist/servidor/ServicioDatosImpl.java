@@ -25,6 +25,9 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	private HashMap<String,List<String>> repositorio_usuario;
 	//HashMao para cada usuario, con sus repositorios activos linkados que tienen archivos.
 	private HashMap<String, HashMap<String,List<MetaFichero>>> ficheros_usuario;
+	//HashMao para cada usuario, con sus repositorios  activos linkados que tienen archivos compartidos.
+	private HashMap<String, HashMap<String,List<MetaFichero>>> ficheros_compartidos;
+	private static int siguiente_repositorio;
 	
 	public ServicioDatosImpl () throws RemoteException {
 		usuarios_registrados = new ArrayList<String>();
@@ -34,6 +37,9 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		repositorio_usuario = new HashMap<String,List<String>>();
 		ficheros_usuario = new HashMap<String, HashMap<String,List<MetaFichero>>>();
 		repositorios_activos = new HashMap<String, Repositorio>();
+		ficheros_compartidos = new HashMap<String, HashMap<String,List<MetaFichero>>>();
+		siguiente_repositorio = 0;
+		
 	}
 
 	public void registrarCliente(String nombre) throws RemoteException {
@@ -76,54 +82,52 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 
 	@Override
 	public Repositorio linkRepositorio(String nombre_cliente) throws CustomExceptions, RemoteException {
-		Repositorio repo;
+		Repositorio repositorio;
+		String nombre_repositorio;
 		if(!repositorios_logueados.isEmpty()) {
-			//Añado un repositorio aleatorio a la lista de repositorios del usuario.
-			int ialea = (int) Math.random()*repositorios_logueados.size();
-			String [] keys = repositorios_logueados.keySet().toArray(new String[repositorios_logueados.keySet().size()]);
-			String nombre_repositorio = keys[ialea];
-			//No inicializo hasta que es necesario el repositorio, hasta este momento el usuario puede haber dado de alta e
-			//iniciado sesion muchos repositorios pero cada objeto repositorio no se habrá inicializado hasta que un cliente lo
-			//necesite.
-			if(!repositorios_activos.containsKey(nombre_repositorio)) { 				
-				repo = new Repositorio(nombre_repositorio);
-				repo.setId(repositorios_logueados.get(nombre_repositorio)); 
-				repositorios_activos.put(nombre_repositorio, repo);
-				System.out.println("Repositorio inicializado " + nombre_repositorio);
-			}
-			else
-				repo = repositorios_activos.get(nombre_repositorio);
 			if(repositorio_usuario.get(nombre_cliente) == null) {
-				repositorio_usuario.put(nombre_cliente,new ArrayList<String>() {
-					private static final long serialVersionUID = 1L;
-				{
-					add(nombre_repositorio);
-				}});
-				repo = repositorios_activos.get(nombre_repositorio);
-				System.out.println("Repositorios inicializados para cliente y linkado repositorio");
-			}
-			else
-				if(!repositorio_usuario.get(nombre_cliente).contains(nombre_repositorio)) {
-					repositorio_usuario.get(nombre_cliente).add(nombre_repositorio);
-					repo = repositorios_activos.get(nombre_repositorio);
+				if(siguiente_repositorio == repositorios_logueados.size() - 1) {
+					siguiente_repositorio = 0;
+				} else { 
+					siguiente_repositorio++;
+				}
+				String [] keys = repositorios_logueados.keySet().toArray(new String[repositorios_logueados.keySet().size()]);
+				nombre_repositorio = keys[siguiente_repositorio];
+				repositorio_usuario.put(nombre_cliente,new ArrayList<String>());
+				repositorio_usuario.get(nombre_cliente).add(nombre_repositorio);
+				if(!repositorios_activos.containsKey(nombre_repositorio)) {
+					repositorio = new Repositorio(nombre_repositorio);
+					repositorios_activos.put(nombre_repositorio, repositorio);
+					repositorio.setId(repositorios_logueados.get(nombre_repositorio)); 
 				}
 				else {
-					boolean bandera = false;
-					for(Map.Entry<String, Repositorio> entrada : repositorios_activos.entrySet()) {
-						if(!repositorio_usuario.get(nombre_cliente).contains(entrada.getKey())) {
-							repositorio_usuario.get(nombre_cliente).add(entrada.getKey());
-							repo = repositorios_activos.get(entrada.getKey());
-							bandera = true;
+					repositorio = repositorios_activos.get(nombre_repositorio);
+				}
+				System.out.println("Repositorios inicializados para cliente y linkado repositorio");
+				return repositorio;
+			}
+			else {
+				for (Map.Entry<String, Integer> repo: repositorios_logueados.entrySet()) {
+					nombre_repositorio = repo.getKey();
+					if(!repositorio_usuario.get(nombre_cliente).contains(nombre_repositorio)) {
+						if(!repositorios_activos.containsKey(nombre_repositorio)) { 				
+							repositorio = new Repositorio(nombre_repositorio);
+							repositorio.setId(repositorios_logueados.get(nombre_repositorio)); 
+							repositorios_activos.put(repo.getKey(), repositorio);
+							System.out.println("Repositorio inicializado " + nombre_repositorio);
 						}
-					}
-					if (bandera == false) {
-						throw new CustomExceptions.NoHayRepositoriosLibres("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio ");
-					}
-				}	   	
+						else {
+							repositorio = repositorios_activos.get(nombre_repositorio);
+						}
+						return repositorio;
+					}	
+				}
+			}
+			throw new CustomExceptions.NoHayRepositoriosLibres("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio ");
 		}
-		else 
+		else {
 			throw new CustomExceptions.NoHayRepositoriosRegistrados("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
-		return repo;
+		}
 	}
 
 	public void unlinkRepositorio(String nombre_cliente) throws RuntimeException {
@@ -172,31 +176,45 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		return repositorios;
 	}
 	
-	public List<String> getListaFicherosCliente (String nombre_cliente) throws RemoteException, RuntimeException {
-		List<String> nombres_ficheros = new ArrayList<String>();
-		String nombre_fichero;
+	public List<MetaFichero> getListaFicherosCliente (String nombre_cliente) throws RemoteException, RuntimeException {
+		List<MetaFichero> ficheros = new ArrayList<MetaFichero>();
 		System.out.println("Lista de Repositorios y ficheros del cliente en obtención");
-		HashMap<String,List<MetaFichero>> ficheros_cliente = ficheros_usuario.get(nombre_cliente);
-		for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_cliente.entrySet()) {
-			for(MetaFichero meta : entrada.getValue()) {
-				nombre_fichero = meta.getNombre();
-				if(!nombres_ficheros.contains(nombre_fichero)) {
-					nombres_ficheros.add(nombre_fichero);
+		if(ficheros_usuario.get(nombre_cliente) != null) {
+			HashMap<String,List<MetaFichero>> ficheros_cliente = ficheros_usuario.get(nombre_cliente);
+			for(Map.Entry<String,List<MetaFichero>> entrada : ficheros_cliente.entrySet()) {
+				if(entrada.getValue() != null) {
+					for(MetaFichero meta : entrada.getValue()) {
+						ficheros.add(meta);
+					}
+				}
+			}
+		}
+		if(ficheros_compartidos.get(nombre_cliente) != null) {
+			HashMap<String,List<MetaFichero>> archivos_compartidos =  ficheros_compartidos.get(nombre_cliente);
+			for(Map.Entry<String,List<MetaFichero>> entrada : archivos_compartidos.entrySet()) {
+				if(entrada.getValue() != null) {
+					for(MetaFichero meta : entrada.getValue()) {
+						ficheros.add(meta);
+					}
 				}
 			}
 		}
 		System.out.println("Lista de Repositorios y ficheros del cliente obtenido");
-		return nombres_ficheros;
+		return ficheros;
 	}
 	
 	public Repositorio getRepositorioFichero (String nombre_fichero, String nombre_cliente) throws RemoteException {
-		for(Map.Entry<String, List<MetaFichero>> ficheros_repositorio : ficheros_usuario.get(nombre_cliente).entrySet()) {	
-			for(MetaFichero fichero : ficheros_repositorio.getValue()) {
-				if(fichero.getNombre().equals(nombre_fichero)) {
-					return repositorios_activos.get(ficheros_repositorio.getKey());
+		if(ficheros_usuario.get(nombre_cliente) != null) {
+			for(Map.Entry<String, List<MetaFichero>> ficheros_repositorio : ficheros_usuario.get(nombre_cliente).entrySet()) {	
+				if (ficheros_repositorio.getValue() != null) {
+					for(MetaFichero fichero : ficheros_repositorio.getValue()) {
+						if(fichero.getNombre().equals(nombre_fichero)) {
+							return repositorios_activos.get(ficheros_repositorio.getKey());
+						}
 					}
 				}
 			}
+		}
 		throw new RuntimeException ("No se ha encontrado el archivo");
 	}
 	
@@ -226,6 +244,9 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	
 	public List<Repositorio> getRepositoriosUsuario(String nombre_cliente) throws RemoteException {
 		List<String> nombres_repositorios = repositorio_usuario.get(nombre_cliente);
+		System.out.println(nombre_cliente);
+		System.out.println(repositorio_usuario.get(nombre_cliente));
+		System.out.println(nombres_repositorios.size() + "  " + nombre_cliente);
 		List<Repositorio> repositorios_usuario = new ArrayList<Repositorio>();
 		for(String nombre_repo : nombres_repositorios) {
 			repositorios_usuario.add(repositorios_activos.get(nombre_repo));
@@ -234,7 +255,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	}
 	
 	public void addMetaFichero(String nombre_repositorio, MetaFichero metafichero, String nombre_cliente) throws RemoteException {
-		if(!ficheros_usuario.containsKey(nombre_cliente))
+		if(!ficheros_usuario.containsKey(nombre_cliente)) {
 			ficheros_usuario.put(nombre_cliente, new HashMap<String,List<MetaFichero>>() {
 				private static final long serialVersionUID = 1L;
 			{
@@ -244,6 +265,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 					add(metafichero);
 				}});
 			}});
+		}
 		else
 			ficheros_usuario.get(nombre_cliente).get(nombre_repositorio).add(metafichero);
 	}
@@ -286,4 +308,19 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		repositorios_logueados.remove(nombre);
 	}
 	
+	public void addMetaFicheroCompartido (String nombre_repositorio, MetaFichero fichero, String nombre_destinatario) throws RemoteException {
+		if(!ficheros_compartidos.containsKey(nombre_destinatario)) {
+			ficheros_compartidos.put(nombre_destinatario, new HashMap<String,List<MetaFichero>>() {
+				private static final long serialVersionUID = 1L;
+			{
+				put(nombre_repositorio, new ArrayList<MetaFichero>() {
+					private static final long serialVersionUID = 1L;
+				{
+					add(fichero);
+				}});
+			}});
+		}
+		else
+			ficheros_compartidos.get(nombre_destinatario).get(nombre_repositorio).add(fichero);
+	}
 }

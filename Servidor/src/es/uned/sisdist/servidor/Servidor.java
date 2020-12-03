@@ -6,8 +6,13 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
+import es.uned.sisdist.common.MetaFichero;
+import es.uned.sisdist.common.Repositorio;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
 import es.uned.sisdist.common.ServicioClOperadorInterface;
 import es.uned.sisdist.common.ServicioDatosInterface;
@@ -56,14 +61,17 @@ public class Servidor implements Remote{
 		
 		bd = (ServicioDatosInterface) registry.lookup("rmi://"+ ip + ":8888/datos_remotos/1");
 		
-		while (opcion != 3) {
+		while (opcion != 4) {
 			System.out.println("-------------------------------------------");
-			System.out.println("Elige la operación de repositorio");
+			System.out.println("Elige la operación de servidor");
 			System.out.println("1. Listar clientes registrados del sistema");
 			System.out.println("2. Listar repositorios del sistema");
-			System.out.println("3. Salir");
+			System.out.println("3. Listar Repositorios de cada ususario");
+			System.out.println("4. Salir");
+		
 			opcion = in.nextInt();
 			in.nextLine();
+			
 			switch(opcion) {
 				case 1:
 					try {
@@ -90,10 +98,20 @@ public class Servidor implements Remote{
 						break;
 					}
 				case 3:
+					System.out.println("Los repositorios de cada usuario son: ");
+					for(Map.Entry<String,Integer> entrada : bd.getListaClientesActivos().entrySet()) {
+						System.out.println(entrada.getKey() + ":");
+						for(Repositorio repo : bd.getRepositoriosUsuario(entrada.getKey())){
+							System.out.print(repo.getNombre() + "    ");
+						}
+						System.out.println("");
+					}
+					break;
+				case 4: 
 					System.out.println("");
 					System.out.println("Gracias por utilizar el sistema, vuelva pronto!");
 					System.out.println("");
-					opcion = 3;
+					opcion = 4;
 					break;
 				default:
 					System.out.println("");

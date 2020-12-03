@@ -99,4 +99,24 @@ public class CustomExceptions extends RuntimeException {
 	        super (message, cause);
 	    }
 	}
+	
+	public static class PermisoDenegado extends CustomExceptions{
+		private static final long serialVersionUID = 1L;
+
+		public PermisoDenegado () {
+			
+	    }
+
+	    public PermisoDenegado (String message) {
+	        super (message);
+	    }
+
+	    public PermisoDenegado (Throwable cause) {
+	        super (cause);
+	    }
+
+	    public PermisoDenegado (String message, Throwable cause) {
+	        super (message, cause);
+	    }
+	}
 }

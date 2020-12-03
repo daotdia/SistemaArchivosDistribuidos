@@ -10,5 +10,5 @@ public interface ServicioClOperadorInterface extends Remote{
 	//y el archivo que quiere subir
 	public void subirArchivo(Fichero fichero, Repositorio repo, String nombre_cliente, String nombre_fichero) throws RemoteException, IOException;
 	
-	public void deleteArchivo(Repositorio repo, String nombre_fichero, String nombre_cliente) throws RemoteException;
+	public void deleteArchivo(Repositorio repo, String nombre_fichero, String nombre_cliente) throws RemoteException, Exception;
 }

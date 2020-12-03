@@ -64,13 +64,13 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	public void bajarFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception{
 		Repositorio repo;
 		boolean bandera = false;
-		List<String> nombres_ficheros = servicio_datos.getListaFicherosCliente(nombre_cliente);
- 		for(String nombre : nombres_ficheros) {
- 			if(nombre.equals(nombre_fichero)) {
+		List<MetaFichero> ficheros = servicio_datos.getListaFicherosCliente(nombre_cliente);
+ 		for(MetaFichero fichero : ficheros) {
+ 			if(fichero.getNombre().equals(nombre_fichero)) {
  				System.out.println("Fichero encontrado");
  				//No me immporta de cuál se baje, aunque se podría modificar esta decisión.
- 				repo = servicio_datos.getRepositorioFichero(nombre_fichero, nombre_cliente);
- 				sso.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
+ 				repo = servicio_datos.getRepositorioFichero(nombre_fichero, fichero.getPropietario());
+ 				sso.bajarFichero(repo, nombre_fichero, path_local, fichero.getPropietario());
  				System.out.println("Fichero bajado");
  				bandera = true;
  				break;
@@ -82,24 +82,25 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	}
 
 	@Override
-	public void borrarFichero(String nombre_cliente, String nombre_fichero) throws RemoteException {
-		List<Repositorio> repositorios = servicio_datos.getRepositoriosFichero(nombre_fichero, nombre_cliente);
-		for(Repositorio repo : repositorios) {
-			sco.deleteArchivo(repo,nombre_fichero, nombre_cliente);
-			servicio_datos.deleteFicheroCliente(nombre_cliente, repo.getNombre(), nombre_fichero);
+	public void borrarFichero(String nombre_cliente, String nombre_fichero) throws Exception, RemoteException {
+		if(comprobarPropiedad(nombre_cliente, nombre_fichero)) {
+			List<Repositorio> repositorios = servicio_datos.getRepositoriosFichero(nombre_fichero, nombre_cliente);
+			try {
+				for(Repositorio repo : repositorios) {
+					sco.deleteArchivo(repo,nombre_fichero, nombre_cliente);
+					servicio_datos.deleteFicheroCliente(nombre_cliente, repo.getNombre(), nombre_fichero);
+				}
+			} catch(Exception e) {
+				throw new Exception();
+			}
 		}
-	}
-
-	@Override
-	public List<Integer> compartirFichero(int sesion, int identificador, List<Integer> destinatarios)
-			throws RemoteException {
-		// TODO Auto-generated method stub
-		return null;
+		else 
+			throw new CustomExceptions.PermisoDenegado();
 	}
 
 	@Override
 	public List<String> getListaFicheros(String nombre_cliente) throws RemoteException {
-		List<MetaFichero> ficheros = servicio_datos.getListaFicheros(nombre_cliente);
+		List<MetaFichero> ficheros = servicio_datos.getListaFicherosCliente(nombre_cliente);
 		List<String> nombre_ficheros = new ArrayList<String>();
 		for(MetaFichero fichero : ficheros) {
 			nombre_ficheros.add(fichero.getNombre());
@@ -137,5 +138,24 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	public List<String> getFicherosClienteRepositorio(String nombre_cliente, String nombre_repositorio) throws RemoteException{
 		return servicio_datos.getFicherosClienteRepositorio(nombre_cliente, nombre_repositorio);
 	}
+	
+	public void compartirFichero(String nombre_propietario, String nombre_destinatario, String nombre_fichero) throws Exception, RemoteException {
+		if(comprobarPropiedad(nombre_propietario, nombre_fichero)) {
+			Repositorio repo = servicio_datos.getRepositorioFichero(nombre_fichero, nombre_propietario);
+			servicio_datos.addMetaFicheroCompartido(repo.getNombre(), new MetaFichero(nombre_propietario, nombre_fichero), nombre_destinatario);
+		}
+		else 
+			throw new CustomExceptions.PermisoDenegado();
+	}
 
+	public boolean comprobarPropiedad(String nombre_cliente, String nombre_fichero) throws RemoteException {
+		for(MetaFichero fichero: servicio_datos.getListaFicherosCliente(nombre_cliente)) {
+			if(fichero.getNombre().equals(nombre_fichero)) {
+				if (fichero.getPropietario().equals(nombre_cliente)) {
+						return true;
+				}
+			}
+		}
+		return false;
+	}
 }

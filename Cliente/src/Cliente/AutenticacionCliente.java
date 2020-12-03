@@ -1,6 +1,5 @@
 package Cliente;
 import java.net.InetAddress;
-import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -14,7 +13,6 @@ import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 public class AutenticacionCliente {
 	private static ServicioAutenticacionInterface servicio_autenticacion;
 	private static int port = 2100;
-	private static boolean primero = true;
 	
 	public static void main(String[] args) throws Exception {
 		InetAddress IP=InetAddress.getLocalHost();
@@ -27,14 +25,18 @@ public class AutenticacionCliente {
 		
 		Scanner in = new Scanner(System.in);
 		boolean salir_autenticacion = false;	
+		
+		
 
 		try {
 			sdc = new ServicioDiscoClienteImpl();
 			Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, getPort());
-			registry.rebind("rmi://"+ ip + ":3434/sdc_remoto/1" , sdc_remoto);
-			primero = false;
+			registry.rebind("rmi://"+ ip + ":3434/sdc_remoto/" + getPort() , sdc_remoto);
+			port++;
 		} catch (Exception e) {
-			sdc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/1");
+			System.out.println(e.getMessage());
+			sdc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/" + port);
+			
 		}
 		
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
@@ -50,7 +52,9 @@ public class AutenticacionCliente {
 				catch (Exception e) {
 					opcion = 1000;
 				}
-				in.nextLine();
+				if(in.hasNextLine()) {
+					in.nextLine();
+				}
 				switch(opcion) {
 					case 1:
 						System.out.println("Indique el nombre del usuario");
@@ -61,7 +65,7 @@ public class AutenticacionCliente {
 						}
 						else
 							System.out.println("Ya existe un cliente registrado con nombre " + nombre + " intentelo con otro nombre");
-						System.out.println("");
+							System.out.println("");
 						break;
 					case 2: 
 						try {
@@ -83,6 +87,7 @@ public class AutenticacionCliente {
 						String [] array = new String[1];
 						array[0] = nombre;
 						Cliente.main(array);
+						salir_autenticacion = true;
 						break;
 					case 3:
 						System.out.println("Gracias por usar el sistema, vuelve pronto!");
@@ -93,13 +98,15 @@ public class AutenticacionCliente {
 						break;
 				}
 			}
-		
-		registry.unbind("rmi://"+ ip + ":3434/sdc_remoto/1");
-		UnicastRemoteObject.unexportObject(sdc, true);
-		in.close();
+		registry.unbind("rmi://"+ ip + ":3434/sdc_remoto/" + port);
+		try {
+			UnicastRemoteObject.unexportObject(sdc, true);
+		}
+		catch (Exception e) {
+			in.close();
+		}
 	}
 	public static int getPort() {
-		port++;
-		return port;
+		return port + 1;
 	}
 }

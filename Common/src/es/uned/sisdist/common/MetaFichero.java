@@ -14,6 +14,11 @@ public class MetaFichero implements Serializable {
 		this.nombre = fichero.obtenerNombre();
 	}
 	
+	public MetaFichero (String propietario, String nombre) {
+		this.propietario = propietario;
+		this.nombre = nombre;
+	}
+	
 	public String getNombre() {
 		return nombre;
 	}

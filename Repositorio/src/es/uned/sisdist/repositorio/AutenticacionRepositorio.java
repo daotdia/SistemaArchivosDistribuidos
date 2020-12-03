@@ -42,7 +42,9 @@ public class AutenticacionRepositorio {
 			catch (Exception e) {
 				opcion = 1000;
 			}
-			in.nextLine();
+			if(in.hasNextLine()) {
+				in.nextLine();
+			}
 			switch(opcion) {
 				case 1:
 					System.out.println("Indique el nombre del repositorio");
@@ -71,6 +73,7 @@ public class AutenticacionRepositorio {
 					String [] array = new String[1];
 					array[0] = nombre_repositorio;
 					Repositorio.main(array);
+					salir = true;
 					break;
 				case 3:
 					System.out.println("");

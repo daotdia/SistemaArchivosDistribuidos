@@ -57,6 +57,7 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 					sesion = getIdentificador();
 					System.out.println("tratando de iniciar sesion cliente");
 					Repositorio repo = bd.linkRepositorio(nombre);
+					bd.addRepositorioActivo(repo, nombre);
 					System.out.println(repo.getNombre());
 					sg.crearCarpeta(repo.getPath(), nombre);
 					bd.addId(nombre, sesion, 0);

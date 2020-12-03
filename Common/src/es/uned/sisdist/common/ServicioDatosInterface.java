@@ -35,7 +35,7 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public List<String> getListaClientesRepositorio (String nombre_repositorio) throws RemoteException;
 	
-	public List<String> getListaFicherosCliente (String nombre_cliente) throws RemoteException;
+	public List<MetaFichero> getListaFicherosCliente (String nombre_cliente) throws RemoteException;
 	
 	public List<String> getListaClientesRegistrados () throws RemoteException;
 	
@@ -61,4 +61,7 @@ public interface ServicioDatosInterface extends Remote{
 	public void cerrarSesionCliente (String nombre) throws RemoteException;
 	
 	public void cerraSesionRepositorio (String nombre) throws RemoteException;
+	
+	public void addMetaFicheroCompartido (String nombre_repositorio, MetaFichero fichero, String nombre_destinatario) throws RemoteException;
+	
 }

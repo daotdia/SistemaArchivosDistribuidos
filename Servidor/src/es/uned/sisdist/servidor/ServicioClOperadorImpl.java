@@ -22,9 +22,14 @@ public class ServicioClOperadorImpl implements ServicioClOperadorInterface{
 
 	//Elimina todos los archivos que se llamas igual en los dsitintos repositorios del usuario.
 	@Override
-	public void deleteArchivo(Repositorio repo, String nombre_fichero, String nombre_cliente) throws RemoteException {
-		File file = new File(repo.getPath() + "/" + nombre_cliente + "/" + nombre_fichero);
-		file.delete();
+	public void deleteArchivo(Repositorio repo, String nombre_fichero, String nombre_cliente) throws Exception {
+		try{
+			File file = new File(repo.getPath() + "/" + nombre_cliente + "/" + nombre_fichero);
+			file.delete();
+		} catch(Exception e) {
+			throw new Exception();
+		}
+		
 	}
 
 }

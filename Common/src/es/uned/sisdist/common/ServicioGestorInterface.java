@@ -17,10 +17,9 @@ public interface ServicioGestorInterface extends Remote{
 	
 	//El servidor le devuelve al cliente la URL del Servicio Cliente-Operador.
 	public void borrarFichero(String nombre_cliente, String nombre_fichero)
-			throws RemoteException;
+			throws RemoteException, Exception;
 	
-	public List<Integer> compartirFichero (int sesion, int identificador, 
-			List<Integer> destinatarios) throws RemoteException;
+	public void compartirFichero(String nombre_propietario, String nombre_destinatario, String nombre_fichero) throws RemoteException, Exception;
 	
 	public List<String> getListaFicheros (String nombre_cliente) throws RemoteException;
 	
