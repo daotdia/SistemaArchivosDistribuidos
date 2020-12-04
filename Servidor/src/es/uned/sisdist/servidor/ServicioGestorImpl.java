@@ -61,7 +61,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	}
 
 	@Override
-	public void bajarFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception{
+	public void bajarFichero(String nombre_cliente, String nombre_fichero, String path_local, int port) throws RemoteException, Exception{
 		Repositorio repo;
 		boolean bandera = false;
 		List<MetaFichero> ficheros = servicio_datos.getListaFicherosCliente(nombre_cliente);
@@ -70,7 +70,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
  				System.out.println("Fichero encontrado");
  				//No me immporta de cuál se baje, aunque se podría modificar esta decisión.
  				repo = servicio_datos.getRepositorioFichero(nombre_fichero, fichero.getPropietario());
- 				sso.bajarFichero(repo, nombre_fichero, path_local, fichero.getPropietario());
+ 				sso.bajarFichero(repo, nombre_fichero, path_local, fichero.getPropietario(), port);
  				System.out.println("Fichero bajado");
  				bandera = true;
  				break;
@@ -157,5 +157,9 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 			}
 		}
 		return false;
+	}
+	
+	public int getPortCliente() throws RemoteException{
+		return servicio_datos.getPortCliente();
 	}
 }

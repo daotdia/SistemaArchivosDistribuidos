@@ -67,8 +67,8 @@ public class ServicioSrOperadorImpl implements ServicioSrOperadorInterface {
 	//Baja todos los archivos del nombre indicado, serán varios en el caso de que se encuentren archivos del mismo
 	//nombre en varios repositorios.
 	@Override
-	public void bajarFichero(Repositorio repo, String nombre_fichero, String path_local, String nombre_cliente) throws RemoteException, Exception {
-		dc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/1");
+	public void bajarFichero(Repositorio repo, String nombre_fichero, String path_local, String nombre_cliente, int port) throws RemoteException, Exception {
+		dc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/" + port);
 		dc.bajarFichero(repo, nombre_fichero, path_local, nombre_cliente);
 	}
 

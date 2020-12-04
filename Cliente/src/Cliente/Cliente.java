@@ -1,26 +1,43 @@
 package Cliente;
 import java.net.InetAddress;
+import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.Scanner;
 
 import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
+import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 import es.uned.sisdist.common.ServicioGestorInterface;
 
 public class Cliente {
 	private static ServicioAutenticacionInterface servicio_autenticacion;
 	private static ServicioGestorInterface servicio_gestor;
+	private static int port = 2100;
 	
 	public static void main (String [] args) throws Exception {
 		InetAddress IP=InetAddress.getLocalHost();
 		String ip = IP.getHostAddress();
+		ServicioDiscoClienteInterface sdc;
 		
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
 		servicio_gestor = (ServicioGestorInterface) registry.lookup("rmi://"+ ip + ":2323/sg_remoto/1");
+		
+		try {
+			sdc = new ServicioDiscoClienteImpl();
+			port = servicio_gestor.getPortCliente();
+			Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, port);
+			registry.rebind("rmi://"+ ip + ":3434/sdc_remoto/" + port , sdc_remoto);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			sdc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/" + port);	
+		}
+		
+		
 		
 		String nombre = args[0];
 		boolean salir_archivos = false;
@@ -72,7 +89,7 @@ public class Cliente {
 					System.out.println("Indique el path local donde bajar el archivo");
 					path = in.nextLine();		
 					try {
-					servicio_gestor.bajarFichero(nombre, nombre_fichero, path);
+					servicio_gestor.bajarFichero(nombre, nombre_fichero, path, port);
 					} catch (RuntimeException e) {
 						System.out.println("Fichero con nombre " + nombre_fichero + " no encontrado, compruebelo y pruebe otra vez");
 						break;
@@ -133,6 +150,17 @@ public class Cliente {
 		} else {
 			System.out.println("Este usuario no está conectado, conectelo antes en el menu de autenticación");
 		}
-		in.close();
+		registry.unbind("rmi://"+ ip + ":3434/sdc_remoto/" + port);
+		try {
+			UnicastRemoteObject.unexportObject(sdc, true);
+		}
+		catch (Exception e) {
+			System.out.println(e.getMessage());
+			in.close();
+		}
+	}
+	
+	public static int getPort() {
+		return port + 1;
 	}
 }

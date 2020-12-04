@@ -13,5 +13,5 @@ public interface ServicioSrOperadorInterface extends Remote{
 	
 	//Le pasa a DiscoCliente el pathremoto donde esta el archivo remoto que quiere bajar el cliente,
 	//para ello utiliza la URL que le da el servidor
-	public void bajarFichero(Repositorio repo, String nombre_fichero, String path_local, String nombre_cliente) throws RemoteException, Exception;
+	public void bajarFichero(Repositorio repo, String nombre_fichero, String path_local, String nombre_cliente, int port) throws RemoteException, Exception;
 }

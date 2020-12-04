@@ -12,7 +12,7 @@ import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 
 public class AutenticacionCliente {
 	private static ServicioAutenticacionInterface servicio_autenticacion;
-	private static int port = 2100;
+	
 	
 	public static void main(String[] args) throws Exception {
 		InetAddress IP=InetAddress.getLocalHost();
@@ -25,19 +25,7 @@ public class AutenticacionCliente {
 		
 		Scanner in = new Scanner(System.in);
 		boolean salir_autenticacion = false;	
-		
-		
 
-		try {
-			sdc = new ServicioDiscoClienteImpl();
-			Remote sdc_remoto = UnicastRemoteObject.exportObject(sdc, getPort());
-			registry.rebind("rmi://"+ ip + ":3434/sdc_remoto/" + getPort() , sdc_remoto);
-			port++;
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			sdc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/" + port);
-			
-		}
 		
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
 		
@@ -98,15 +86,5 @@ public class AutenticacionCliente {
 						break;
 				}
 			}
-		registry.unbind("rmi://"+ ip + ":3434/sdc_remoto/" + port);
-		try {
-			UnicastRemoteObject.unexportObject(sdc, true);
-		}
-		catch (Exception e) {
-			in.close();
-		}
-	}
-	public static int getPort() {
-		return port + 1;
 	}
 }

@@ -28,6 +28,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	//HashMao para cada usuario, con sus repositorios  activos linkados que tienen archivos compartidos.
 	private HashMap<String, HashMap<String,List<MetaFichero>>> ficheros_compartidos;
 	private static int siguiente_repositorio;
+	private static int port_cliente = 2100;
 	
 	public ServicioDatosImpl () throws RemoteException {
 		usuarios_registrados = new ArrayList<String>();
@@ -244,9 +245,6 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	
 	public List<Repositorio> getRepositoriosUsuario(String nombre_cliente) throws RemoteException {
 		List<String> nombres_repositorios = repositorio_usuario.get(nombre_cliente);
-		System.out.println(nombre_cliente);
-		System.out.println(repositorio_usuario.get(nombre_cliente));
-		System.out.println(nombres_repositorios.size() + "  " + nombre_cliente);
 		List<Repositorio> repositorios_usuario = new ArrayList<Repositorio>();
 		for(String nombre_repo : nombres_repositorios) {
 			repositorios_usuario.add(repositorios_activos.get(nombre_repo));
@@ -322,5 +320,9 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		}
 		else
 			ficheros_compartidos.get(nombre_destinatario).get(nombre_repositorio).add(fichero);
+	}
+	
+	public int getPortCliente() throws RemoteException {
+		return port_cliente++;
 	}
 }

@@ -64,4 +64,5 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public void addMetaFicheroCompartido (String nombre_repositorio, MetaFichero fichero, String nombre_destinatario) throws RemoteException;
 	
+	public int getPortCliente() throws RemoteException;
 }

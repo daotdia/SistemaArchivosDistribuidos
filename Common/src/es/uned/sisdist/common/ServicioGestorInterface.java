@@ -12,7 +12,7 @@ public interface ServicioGestorInterface extends Remote{
 			throws RemoteException, Exception;
 	
 	//El servidor le devuelve al cliente la URL del Servicio Servidor-Operador.
-	public void bajarFichero(String nombre_cliente, String nombre_fichero, String path_local)
+	public void bajarFichero(String nombre_cliente, String nombre_fichero, String path_local, int port)
 			throws RemoteException, Exception;
 	
 	//El servidor le devuelve al cliente la URL del Servicio Cliente-Operador.
@@ -35,4 +35,6 @@ public interface ServicioGestorInterface extends Remote{
 	public List<String> getFicherosClienteRepositorio(String nombre_cliente, String nombre_repositorio) throws RemoteException;
 	
 	public void salir() throws RemoteException;
+	
+	public int getPortCliente() throws RemoteException;
 }
