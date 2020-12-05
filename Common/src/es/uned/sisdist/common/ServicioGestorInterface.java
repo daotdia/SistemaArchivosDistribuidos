@@ -37,4 +37,6 @@ public interface ServicioGestorInterface extends Remote{
 	public void salir() throws RemoteException;
 	
 	public int getPortCliente() throws RemoteException;
+	
+	public int getPortRepositorio(String nombre_repositorio) throws RemoteException;
 }

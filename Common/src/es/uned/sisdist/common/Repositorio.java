@@ -9,13 +9,16 @@ public class Repositorio implements Serializable{
 	private String nombre;
 	private int identificador; 
 	private String path;
+	private int port_sso, port_sco;
 	
-	public Repositorio (String nombre) {
+	public Repositorio (String nombre, int port) {
 		this.nombre = nombre;
 		//El path del repositorio va a ser su dirección de trabajo actua, en un directorio con su nombre.
 		path = System.getProperty("user.dir")+ "/Repositorio_" + nombre;
 		File directorio=new File(path);
 		directorio.mkdir();
+		this.port_sso = port;
+		this.port_sco = port + 1;
 	}
 	
 	public int getId(){
@@ -34,4 +37,11 @@ public class Repositorio implements Serializable{
 		return nombre;
 	}
 	
+	public int getPortSso() {
+		return port_sso;
+	}
+	
+	public int getPortSco() {
+		return port_sco;
+	}
 }

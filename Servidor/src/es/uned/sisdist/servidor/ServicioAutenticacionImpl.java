@@ -1,6 +1,7 @@
 package es.uned.sisdist.servidor;
 
 import java.net.InetAddress;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -18,15 +19,15 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 	private static ServicioDatosInterface bd;
 	private static ServicioSrOperadorInterface sg;
 	private static Registry registry;
+	private static String ip;
 	
 	public ServicioAutenticacionImpl() throws Exception {
 		registry = LocateRegistry.getRegistry(7777);
 		
 		InetAddress IP=InetAddress.getLocalHost();
-		String ip = IP.getHostAddress();
+		ip = IP.getHostAddress();
 		
 		ServicioAutenticacionImpl.bd = (ServicioDatosInterface) registry.lookup("rmi://"+ ip + ":8888/datos_remotos/1"); 
-		ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/1");;
 	}
 	
 	public boolean registrarObjeto(String nombre, int tipo) throws RemoteException {
@@ -59,6 +60,7 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 					Repositorio repo = bd.linkRepositorio(nombre);
 					bd.addRepositorioActivo(repo, nombre);
 					System.out.println(repo.getNombre());
+					ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/" + repo.getPortSso());
 					sg.crearCarpeta(repo.getPath(), nombre);
 					bd.addId(nombre, sesion, 0);
 				}
@@ -107,10 +109,11 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 
 	//Permito que un usuario logueado pueda eliminar su registro pero quedar logueado hasta
 	//que cierre sesión.
-	public void deleteObjeto(String nombre, int tipo) throws RemoteException {
+	public void deleteObjeto(String nombre, int tipo) throws RemoteException, NotBoundException {
 		if(tipo == 0) {
 			if(bd.getListaClientesRegistrados().contains(nombre)) {
 				for (Repositorio repo : bd.getRepositoriosUsuario(nombre)) {
+					ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/" + repo.getPortSso());
 					sg.borrarCarpetaCliente(repo, nombre);
 				}
 				bd.deleteCliente(nombre);
@@ -121,7 +124,9 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 		if(tipo==1) {
 			try {
 			if(bd.getListaRepositoriosRegistrados().contains(nombre)) {
-				sg.borrarCarpetaRepositorio(bd.getRepositorioActivo(nombre).getPath());
+				Repositorio repo = bd.getRepositorioActivo(nombre);
+				ServicioAutenticacionImpl.sg = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/" + repo.getPortSso());
+				sg.borrarCarpetaRepositorio(repo.getPath());
 				bd.deleteRepositorio(nombre);
 			}
 			else

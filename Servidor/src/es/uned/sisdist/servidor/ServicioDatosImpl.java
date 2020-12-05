@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.MetaFichero;
@@ -18,7 +19,8 @@ import es.uned.sisdist.common.ServicioDatosInterface;
 public class ServicioDatosImpl implements ServicioDatosInterface{
 
 	private List<String> usuarios_registrados;
-	private List<String> repositorios_registrados;
+	private List<String> nombre_repositorios_registrados;
+	private List<Repositorio> repositorios_candidatos;
 	private HashMap<String, Integer> usuarios_activos;
 	private HashMap<String, Integer> repositorios_logueados;
 	private HashMap<String, Repositorio> repositorios_activos;
@@ -29,10 +31,12 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	private HashMap<String, HashMap<String,List<MetaFichero>>> ficheros_compartidos;
 	private static int siguiente_repositorio;
 	private static int port_cliente = 2100;
+	private static int port_repositorio = 5555;
 	
 	public ServicioDatosImpl () throws RemoteException {
 		usuarios_registrados = new ArrayList<String>();
-		repositorios_registrados = new ArrayList<String>();
+		nombre_repositorios_registrados = new ArrayList<String>();
+		repositorios_candidatos = new ArrayList<Repositorio>();
 		usuarios_activos = new HashMap<String,Integer>();
 		repositorios_logueados = new HashMap<String,Integer>();
 		repositorio_usuario = new HashMap<String,List<String>>();
@@ -48,7 +52,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	}
 
 	public void registrarRepositorio(String  nombre) throws RemoteException {
-		repositorios_registrados.add(nombre);
+		nombre_repositorios_registrados.add(nombre);
 	}
 
 	public void deleteCliente(String nombre) throws RemoteException {
@@ -59,11 +63,22 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 			}
 		}
 		unlinkRepositorio(nombre);
+		
+		if(ficheros_usuario.get(nombre) != null) {
+			ficheros_usuario.remove(nombre);
+		}
+		
+		if(ficheros_compartidos != null) {
+			ficheros_compartidos.remove(nombre);
+		}
 	}
 
 	public void deleteRepositorio(String nombre) throws RemoteException {
 		repositorios_activos.remove(nombre);
-		repositorios_registrados.remove(repositorios_registrados.indexOf(nombre));
+		nombre_repositorios_registrados.remove(nombre_repositorios_registrados.indexOf(nombre));
+		if(repositorios_activos.containsKey(nombre)) {
+			repositorios_activos.remove(nombre);
+		}
 		for (Map.Entry<String, List<String>> entrada : repositorio_usuario.entrySet()) {
 			List<String> repos = entrada.getValue();
 			if(repos.contains(nombre)) {
@@ -96,14 +111,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 				nombre_repositorio = keys[siguiente_repositorio];
 				repositorio_usuario.put(nombre_cliente,new ArrayList<String>());
 				repositorio_usuario.get(nombre_cliente).add(nombre_repositorio);
-				if(!repositorios_activos.containsKey(nombre_repositorio)) {
-					repositorio = new Repositorio(nombre_repositorio);
-					repositorios_activos.put(nombre_repositorio, repositorio);
-					repositorio.setId(repositorios_logueados.get(nombre_repositorio)); 
-				}
-				else {
-					repositorio = repositorios_activos.get(nombre_repositorio);
-				}
+				repositorio = repositorios_activos.get(nombre_repositorio);
 				System.out.println("Repositorios inicializados para cliente y linkado repositorio");
 				return repositorio;
 			}
@@ -111,18 +119,13 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 				for (Map.Entry<String, Integer> repo: repositorios_logueados.entrySet()) {
 					nombre_repositorio = repo.getKey();
 					if(!repositorio_usuario.get(nombre_cliente).contains(nombre_repositorio)) {
-						if(!repositorios_activos.containsKey(nombre_repositorio)) { 				
-							repositorio = new Repositorio(nombre_repositorio);
-							repositorio.setId(repositorios_logueados.get(nombre_repositorio)); 
-							repositorios_activos.put(repo.getKey(), repositorio);
-							System.out.println("Repositorio inicializado " + nombre_repositorio);
-						}
-						else {
-							repositorio = repositorios_activos.get(nombre_repositorio);
-						}
+						repositorio_usuario.get(nombre_cliente).add(nombre_repositorio);
+						repositorio = repositorios_activos.get(nombre_repositorio);
+						System.out.println("Repositorio inicializado " + nombre_repositorio);
 						return repositorio;
-					}	
-				}
+					}
+				
+				}	
 			}
 			throw new CustomExceptions.NoHayRepositoriosLibres("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio ");
 		}
@@ -138,7 +141,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	}
 	
 	public List<String> getListaRepositoriosRegistrados() throws RemoteException {
-		return repositorios_registrados;
+		return nombre_repositorios_registrados;
 	}
 	
 	public  HashMap<String, Repositorio> getListaRepositoriosActivos() throws RemoteException {
@@ -325,4 +328,13 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	public int getPortCliente() throws RemoteException {
 		return port_cliente++;
 	}
+	
+	public int getPortRepositorio(String nombre_repositorio) throws RemoteException {
+		port_repositorio = port_repositorio + 2;
+		Repositorio repositorio = new Repositorio(nombre_repositorio, port_repositorio);
+		repositorios_activos.put(nombre_repositorio, repositorio);
+		repositorio.setId(repositorios_logueados.get(nombre_repositorio)); 
+		return port_repositorio;
+	}
+
 }

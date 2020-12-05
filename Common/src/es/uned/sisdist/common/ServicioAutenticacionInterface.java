@@ -1,5 +1,6 @@
 package es.uned.sisdist.common;
 
+import java.rmi.NotBoundException;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
@@ -13,7 +14,7 @@ public interface ServicioAutenticacionInterface extends Remote {
 	
 	public int getIdSesion (String nombre, int tipo) throws RemoteException;
 	
-	public void deleteObjeto (String nombre, int tipo) throws RemoteException;
+	public void deleteObjeto (String nombre, int tipo) throws RemoteException, NotBoundException;
 	
 	public boolean comprobarCliente (String nombre_cliente) throws RemoteException;
 	

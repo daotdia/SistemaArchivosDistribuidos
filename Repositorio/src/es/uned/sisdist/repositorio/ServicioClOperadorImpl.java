@@ -1,4 +1,4 @@
-package es.uned.sisdist.servidor;
+package es.uned.sisdist.repositorio;
 
 import java.io.File;
 import java.io.FileOutputStream;

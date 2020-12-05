@@ -20,7 +20,7 @@ public class Cliente {
 	public static void main (String [] args) throws Exception {
 		InetAddress IP=InetAddress.getLocalHost();
 		String ip = IP.getHostAddress();
-		ServicioDiscoClienteInterface sdc;
+		ServicioDiscoClienteInterface sdc = null;
 		
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		
@@ -34,7 +34,6 @@ public class Cliente {
 			registry.rebind("rmi://"+ ip + ":3434/sdc_remoto/" + port , sdc_remoto);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
-			sdc = (ServicioDiscoClienteInterface) registry.lookup("rmi://"+ ip + ":3434/sdc_remoto/" + port);	
 		}
 		
 		
@@ -99,7 +98,7 @@ public class Cliente {
 					System.out.println("Indique el nombre del archivo a borrar");
 					nombre_fichero = in.nextLine();
 					try {
-					servicio_gestor.borrarFichero(nombre, nombre_fichero);
+						servicio_gestor.borrarFichero(nombre, nombre_fichero);
 					}catch (CustomExceptions.PermisoDenegado e){
 						System.out.println("No tienes permiso para borrar el archivo " + nombre_fichero + " no eres el propietario");
 						break;
@@ -158,6 +157,7 @@ public class Cliente {
 			System.out.println(e.getMessage());
 			in.close();
 		}
+		in.close();
 	}
 	
 	public static int getPort() {

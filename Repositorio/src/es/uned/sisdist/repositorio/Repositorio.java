@@ -6,18 +6,24 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.Arrays;
 import java.util.Scanner;
 
 import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
+import es.uned.sisdist.common.ServicioClOperadorInterface;
 import es.uned.sisdist.common.ServicioGestorInterface;
+import es.uned.sisdist.common.ServicioSrOperadorInterface;
 
 public class Repositorio {
 	private static ServicioAutenticacionInterface servicio_autenticacion;
 	private static ServicioGestorInterface servicio_gestor; 
+	private static int port;
+	private static ServicioSrOperadorInterface sso;
+	private static ServicioClOperadorInterface sco;
 	
-	public static void main (String [] args) throws RemoteException, NotBoundException, UnknownHostException {
+	public static void main (String [] args) throws Exception {
 		System.out.println("");
 		System.out.println("Se encuentra en la sesión del usuario " + args[0]);
 		System.out.println("");
@@ -27,12 +33,29 @@ public class Repositorio {
 		InetAddress IP=InetAddress.getLocalHost();
 		String ip = IP.getHostAddress();
 		
+		String nombre_repositorio = args[0];
+		Scanner in = new Scanner(System.in);
 		
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
 		servicio_gestor = (ServicioGestorInterface) registry.lookup("rmi://"+ ip + ":2323/sg_remoto/1");
 		
-		String nombre_repositorio = args[0];
-		Scanner in = new Scanner(System.in);
+		
+		try {
+			port = servicio_gestor.getPortRepositorio(nombre_repositorio);
+			sso = new ServicioSrOperadorImpl();
+			ServicioSrOperadorInterface sso_remoto = (ServicioSrOperadorInterface) UnicastRemoteObject.exportObject(sso, port);
+			registry.rebind("rmi://"+ ip + ":5555/sso_remoto/" + port, sso_remoto);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+		
+		try {
+			sco = new ServicioClOperadorImpl();
+			ServicioClOperadorInterface sco_remoto = (ServicioClOperadorInterface) UnicastRemoteObject.exportObject(sco, port + 1);
+			registry.rebind("rmi://"+ ip + ":2222/sco_remoto/" + (port + 1), sco_remoto);
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
 		
 		boolean salir = false;
 		int opcion = -1000;
@@ -114,6 +137,10 @@ public class Repositorio {
 		} else {
 			System.out.println("Este repositorio no está conectado, conectelo antes en el menu de autenticación");
 		}
+		registry.unbind("rmi://"+ ip + ":2222/sco_remoto/" + (port + 1));
+		UnicastRemoteObject.unexportObject(sso, true);
+		registry.unbind("rmi://"+ ip + ":5555/sso_remoto/" + port);
+		UnicastRemoteObject.unexportObject(sco, true);
 		in.close();
 	}
 }

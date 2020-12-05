@@ -14,7 +14,7 @@ public class ServicioDiscoClienteImpl implements ServicioDiscoClienteInterface {
 		System.out.println("Creando Fichero");
 		Fichero fichero;
 		try {
-		fichero = new Fichero(repo.getPath()+ "/" + nombre_cliente, nombre_fichero, nombre_cliente);
+			fichero = new Fichero(repo.getPath()+ "/" + nombre_cliente, nombre_fichero, nombre_cliente);
 		} catch (NullPointerException e) {
 			throw new NullPointerException("fichero no encontrao en ningún repositorio");
 		}

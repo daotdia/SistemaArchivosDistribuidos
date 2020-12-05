@@ -25,17 +25,17 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	private static ServicioSrOperadorInterface sso;
 	private static ServicioClOperadorInterface sco;
 	private static Registry registry;
+	String ip;
 	
 	public ServicioGestorImpl () throws RemoteException, NotBoundException, UnknownHostException {
 		registry =  LocateRegistry.getRegistry(7777);
 		
 		InetAddress IP=InetAddress.getLocalHost();
-		String ip = IP.getHostAddress();
+		ip = IP.getHostAddress();
 		
 		servicio_datos = (ServicioDatosInterface) registry.lookup("rmi://"+ ip + ":8888/datos_remotos/1"); 
-		sso = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/1");
-		sco = (ServicioClOperadorInterface) registry.lookup("rmi://"+ ip + ":2222/sco_remoto/1");
 	}
+	
 	@Override
 	public void subirFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception {
 		Repositorio repo;
@@ -46,6 +46,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 			try {
 				servicio_datos.linkRepositorio(nombre_cliente);
 				repo = servicio_datos.getRepositoriosUsuario(nombre_cliente).get(new Random().nextInt(servicio_datos.getRepositoriosUsuario(nombre_cliente).size()));
+				sso = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/" + repo.getPortSso());
 				sso.crearCarpeta(repo.getPath(), nombre_cliente);
 			} catch (Exception e) {
 				throw new CustomExceptions.NoHayRepositoriosLibres("No hay repositorios disponibles para linkar al usuario, inicializar nuevos");
@@ -57,6 +58,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 		MetaFichero metafichero = new MetaFichero(fichero);
 		servicio_datos.addMetaFichero(repo.getNombre(), metafichero, nombre_cliente);
 		System.out.println("Tratando de iniciar subida");
+		sco = (ServicioClOperadorInterface) registry.lookup("rmi://"+ ip + ":2222/sco_remoto/" + repo.getPortSco());
 		sco.subirArchivo(fichero, repo, nombre_cliente, nombre_fichero);
 	}
 
@@ -70,6 +72,8 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
  				System.out.println("Fichero encontrado");
  				//No me immporta de cuál se baje, aunque se podría modificar esta decisión.
  				repo = servicio_datos.getRepositorioFichero(nombre_fichero, fichero.getPropietario());
+ 				System.out.println(repo.getPath());
+ 				sso = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/" + repo.getPortSso());
  				sso.bajarFichero(repo, nombre_fichero, path_local, fichero.getPropietario(), port);
  				System.out.println("Fichero bajado");
  				bandera = true;
@@ -87,6 +91,7 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 			List<Repositorio> repositorios = servicio_datos.getRepositoriosFichero(nombre_fichero, nombre_cliente);
 			try {
 				for(Repositorio repo : repositorios) {
+					sco = (ServicioClOperadorInterface) registry.lookup("rmi://"+ ip + ":2222/sco_remoto/" + repo.getPortSco());
 					sco.deleteArchivo(repo,nombre_fichero, nombre_cliente);
 					servicio_datos.deleteFicheroCliente(nombre_cliente, repo.getNombre(), nombre_fichero);
 				}
@@ -161,5 +166,9 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	
 	public int getPortCliente() throws RemoteException{
 		return servicio_datos.getPortCliente();
+	}
+	
+	public int getPortRepositorio(String nombre_repositorio) throws RemoteException {
+		return servicio_datos.getPortRepositorio(nombre_repositorio);
 	}
 }

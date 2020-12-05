@@ -40,14 +40,6 @@ public class Servidor implements Remote{
 		ServicioDatosInterface datos_remotos = (ServicioDatosInterface) UnicastRemoteObject.exportObject(datos,8888);
 		registry.rebind("rmi://"+ ip + ":8888/datos_remotos/1", datos_remotos);
 		
-		ServicioSrOperadorInterface sso = new ServicioSrOperadorImpl();
-		ServicioSrOperadorInterface sso_remoto = (ServicioSrOperadorInterface) UnicastRemoteObject.exportObject(sso, 5555);
-		registry.rebind("rmi://"+ ip + ":5555/sso_remoto/1", sso_remoto);
-		
-		ServicioClOperadorInterface sco = new ServicioClOperadorImpl();
-		ServicioClOperadorInterface sco_remoto = (ServicioClOperadorInterface) UnicastRemoteObject.exportObject(sco, 2222);
-		registry.rebind("rmi://"+ ip + ":2222/sco_remoto/1", sco_remoto);
-		
 		ServicioGestorInterface sg = new ServicioGestorImpl();
 		ServicioGestorInterface sg_remoto = (ServicioGestorInterface) UnicastRemoteObject.exportObject(sg, 2323);
 		registry.rebind("rmi://"+ ip + ":2323/sg_remoto/1", sg_remoto);
@@ -127,11 +119,8 @@ public class Servidor implements Remote{
 		UnicastRemoteObject.unexportObject(datos, true);
 		registry.unbind("rmi://"+ ip + ":6666/autenticacion_remota/1");
 		UnicastRemoteObject.unexportObject(autenticacion, true);
-		registry.unbind("rmi://"+ ip + ":5555/sso_remoto/1");
-		UnicastRemoteObject.unexportObject(sso, true);
 		registry.unbind("rmi://"+ ip + ":2323/sg_remoto/1");
 		UnicastRemoteObject.unexportObject(sg, true);
-		registry.unbind("rmi://"+ ip + ":2222/sco_remoto/1");
-		UnicastRemoteObject.unexportObject(sco, true);
+
 	}
 }
