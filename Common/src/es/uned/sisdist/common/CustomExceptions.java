@@ -1,9 +1,17 @@
+/* 
+ * Autor:David Otero Díaz.
+ * Mail: dotero64@alumno.uned.es
+ * 
+ * Clase que encapsula a distintas clases de excepciones para controlar la interacción del usuario con el sistema de archivos distribuido.
+ * 
+ * */
 package es.uned.sisdist.common;
 
 public class CustomExceptions extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 	
+	//Clase excepción de la que heredán todas las clases de excepciones cutomizadas para el sistema de archivos remoto. 
 	public CustomExceptions () {
 		
     }
@@ -20,6 +28,7 @@ public class CustomExceptions extends RuntimeException {
         super (message, cause);
     }
     
+    //Clase interna excepción para indicar que no hay repositorios libres.
 	public static class NoHayRepositoriosLibres extends CustomExceptions{
 		private static final long serialVersionUID = 1L;
 
@@ -40,6 +49,7 @@ public class CustomExceptions extends RuntimeException {
 	    }
 	}
 	
+	//Clase interna excepción para indicar que el objeto no está registrado.
 	public static class ObjetoNoRegistrado extends CustomExceptions{
 		private static final long serialVersionUID = 1L;
 
@@ -59,7 +69,7 @@ public class CustomExceptions extends RuntimeException {
 	        super (message, cause);
 	    }
 	}
-	
+	//Clase interna excepción para indicar que no hay repositorios registrados.
 	public static class NoHayRepositoriosRegistrados extends CustomExceptions{
 		private static final long serialVersionUID = 1L;
 
@@ -79,7 +89,7 @@ public class CustomExceptions extends RuntimeException {
 	        super (message, cause);
 	    }
 	}
-
+	//Clase interna excepción para indicar el repositorio todavía no ha sido utilizado.
 	public static class RepositorioTodaviaNoUtilizado extends CustomExceptions{
 		private static final long serialVersionUID = 1L;
 
@@ -99,7 +109,7 @@ public class CustomExceptions extends RuntimeException {
 	        super (message, cause);
 	    }
 	}
-	
+	//Clase interna excepción para indicar que no se tiene permiso para realizar la operación..
 	public static class PermisoDenegado extends CustomExceptions{
 		private static final long serialVersionUID = 1L;
 

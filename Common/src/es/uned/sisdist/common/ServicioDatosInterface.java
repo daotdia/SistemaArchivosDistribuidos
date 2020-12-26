@@ -1,3 +1,10 @@
+/* 
+ * Autor:David Otero Díaz.
+ * Mail: dotero64@alumno.uned.es
+ * 
+ * Interfaz del Servicio de Datos.
+ * 
+ * */
 package es.uned.sisdist.common;
 
 import java.rmi.Remote;
@@ -19,7 +26,7 @@ public interface ServicioDatosInterface extends Remote{
 	
 	public Repositorio linkRepositorio (String nombre_cliente) throws RemoteException;
 	
-	public void unlinkRepositorio(String Nombre) throws RemoteException;
+	public void unlinkRepositorios(String Nombre) throws RemoteException;
 	
 	public List<String> getListaRepositoriosRegistrados () throws RemoteException;
 	

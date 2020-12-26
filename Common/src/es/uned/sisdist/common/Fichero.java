@@ -50,9 +50,8 @@ public class Fichero implements Serializable{
 		peso = 0;
 		
 		try{
-			c = new CheckedInputStream(new FileInputStream(ruta+"/"+nombre), new CRC32());
-			peso = new File(ruta+"/"+nombre).length();
-			System.out.println(peso);
+			c = new CheckedInputStream(new FileInputStream(ruta+File.separator+nombre), new CRC32());
+			peso = new File(ruta+File.separator+nombre).length();
 			data=new byte[(int) this.peso];
 			while(c.read(data) >= 0) {
 		    }
@@ -60,7 +59,7 @@ public class Fichero implements Serializable{
 			 
 		}catch (FileNotFoundException ef)
 		{
-			System.err.println("Fichero en " + ruta + "/"+ nombre + " no encontrado");
+			System.err.println("Fichero en " + ruta + File.separator + nombre + " no encontrado");
 		} catch (IOException e) {
 
 			System.err.println("Error leyendo fichero" + e.toString());
@@ -70,7 +69,6 @@ public class Fichero implements Serializable{
 	}
 	public boolean escribirEn (OutputStream os)
 	{
-		System.out.println("Tratando de escribir archivo");
 		long CheckSum;
 		CheckedOutputStream cs= new CheckedOutputStream(os,new CRC32());
 		try{

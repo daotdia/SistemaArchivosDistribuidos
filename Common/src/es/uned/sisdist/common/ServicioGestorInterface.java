@@ -1,21 +1,25 @@
+/* 
+ * Autor:David Otero Díaz.
+ * Mail: dotero64@alumno.uned.es
+ * 
+ * Interfaz del Servicio Gestor.
+ * 
+ * */
 package es.uned.sisdist.common;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
-import java.util.Map;
+
 
 public interface ServicioGestorInterface extends Remote{
 
-	//El servidor le devuelve al cliente la URL del Servicio Cliente-Operador.
 	public void subirFichero(String nombre_cliente, String nombre_fichero, String path_local)
 			throws RemoteException, Exception;
 	
-	//El servidor le devuelve al cliente la URL del Servicio Servidor-Operador.
 	public void bajarFichero(String nombre_cliente, String nombre_fichero, String path_local, int port)
 			throws RemoteException, Exception;
 	
-	//El servidor le devuelve al cliente la URL del Servicio Cliente-Operador.
 	public void borrarFichero(String nombre_cliente, String nombre_fichero)
 			throws RemoteException, Exception;
 	
@@ -26,15 +30,9 @@ public interface ServicioGestorInterface extends Remote{
 	public List<String> getListaClientesSistema () throws RemoteException;
 	
 	public List<String> getListaClientesRepositorio (String nombre_repositorio) throws RemoteException;
-	
-	public List<Integer> getListaRepositorios (int sesion) throws RemoteException;
-	
-	public Map<Integer, List<Integer>> getRepositoriosCliente (int sesion)
-			throws RemoteException;
-	
+
 	public List<String> getFicherosClienteRepositorio(String nombre_cliente, String nombre_repositorio) throws RemoteException;
 	
-	public void salir() throws RemoteException;
 	
 	public int getPortCliente() throws RemoteException;
 	

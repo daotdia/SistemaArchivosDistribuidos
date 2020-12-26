@@ -1,3 +1,10 @@
+/* 
+ * Autor:David Otero Díaz.
+ * Mail: dotero64@alumno.uned.es
+ * 
+ * Interfaz del Servicio de Autenticación.
+ * 
+ * */
 package es.uned.sisdist.common;
 
 import java.rmi.NotBoundException;

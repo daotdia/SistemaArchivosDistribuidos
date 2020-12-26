@@ -1,14 +1,19 @@
+/* 
+ * Autor:David Otero Díaz.
+ * Mail: dotero64@alumno.uned.es
+ * 
+ * Clase que se encarga de registrar y autenticar un cliente, cuando se loguea
+ * un cliente inicializa su actividad.
+ * 
+ * */
 package Cliente;
 import java.net.InetAddress;
-import java.rmi.Remote;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
 import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.ServicioAutenticacionInterface;
-import es.uned.sisdist.common.ServicioDiscoClienteInterface;
 
 public class AutenticacionCliente {
 	private static ServicioAutenticacionInterface servicio_autenticacion;
@@ -21,12 +26,11 @@ public class AutenticacionCliente {
 		
 		int opcion = -1;
 		String nombre = "";
-		ServicioDiscoClienteInterface sdc;
 		
 		Scanner in = new Scanner(System.in);
 		boolean salir_autenticacion = false;	
 
-		
+		//Obtengo el seervicio remoto de autenticación.
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
 		
 			while(!salir_autenticacion) {
@@ -34,6 +38,8 @@ public class AutenticacionCliente {
 				System.out.println("1. Registrar usuario");
 				System.out.println("2. Iniciar sesion usuario");
 				System.out.println("3. Exit");
+				
+				//Obtengo la opción elegida por el usuario.
 				try {
 					opcion = in.nextInt();
 				}
@@ -43,8 +49,10 @@ public class AutenticacionCliente {
 				if(in.hasNextLine()) {
 					in.nextLine();
 				}
+				
 				switch(opcion) {
 					case 1:
+						//Rgistro el cliente si no ha sido registrado ya.
 						System.out.println("Indique el nombre del usuario");
 						nombre = in.nextLine();					
 						boolean registrado = servicio_autenticacion.registrarObjeto(nombre, 0);
@@ -57,6 +65,7 @@ public class AutenticacionCliente {
 						break;
 					case 2: 
 						try {
+						//Inicio sesión del cliente.
 						System.out.println("Indique el nombre del usuario");
 						nombre = in.nextLine();					
 						servicio_autenticacion.iniciarSesion(nombre, 0);
@@ -64,6 +73,7 @@ public class AutenticacionCliente {
 						System.out.println("");
 						}
 						catch (CustomExceptions.NoHayRepositoriosLibres e) {
+							//Si no hay repositorio libres, no tiene sentido que un cliente pueda estar activo en el sistema.
 							throw new CustomExceptions.NoHayRepositoriosLibres("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
 						}
 						catch (CustomExceptions.ObjetoNoRegistrado e) {
@@ -72,6 +82,7 @@ public class AutenticacionCliente {
 						catch (CustomExceptions.NoHayRepositoriosRegistrados e) {
 							throw new CustomExceptions.NoHayRepositoriosRegistrados("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
 						}
+						//Iniicio la funcionalidad del cliente pasando por argumentos su nombre.
 						String [] array = new String[1];
 						array[0] = nombre;
 						Cliente.main(array);
@@ -86,5 +97,7 @@ public class AutenticacionCliente {
 						break;
 				}
 			}
+		//Cierro el escaner.
+		in.close();
 	}
 }

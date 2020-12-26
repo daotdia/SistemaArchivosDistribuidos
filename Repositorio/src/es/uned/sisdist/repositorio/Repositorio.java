@@ -1,9 +1,13 @@
+/* 
+ * Autor:David Otero Díaz.
+ * Mail: dotero64@alumno.uned.es
+ * 
+ * Clase que se encarga de implementar la funcionalidad del repositorio una vez está logueado.
+ * 
+ * */
 package es.uned.sisdist.repositorio;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
@@ -28,6 +32,7 @@ public class Repositorio {
 		System.out.println("Se encuentra en la sesión del usuario " + args[0]);
 		System.out.println("");
 		
+		//Obtengo el registro del sistema distribuido.
 		Registry registry =  LocateRegistry.getRegistry(7777);
 		
 		InetAddress IP=InetAddress.getLocalHost();
@@ -36,11 +41,13 @@ public class Repositorio {
 		String nombre_repositorio = args[0];
 		Scanner in = new Scanner(System.in);
 		
+		//Obtengo los servicios de autenticación y gestor del Servidor.
 		servicio_autenticacion = (ServicioAutenticacionInterface) registry.lookup("rmi://"+ ip + ":6666/autenticacion_remota/1");
 		servicio_gestor = (ServicioGestorInterface) registry.lookup("rmi://"+ ip + ":2323/sg_remoto/1");
 		
 		
 		try {
+			//Trato de bindar el servicio SSO del repositorio.
 			port = servicio_gestor.getPortRepositorio(nombre_repositorio);
 			sso = new ServicioSrOperadorImpl();
 			ServicioSrOperadorInterface sso_remoto = (ServicioSrOperadorInterface) UnicastRemoteObject.exportObject(sso, port);
@@ -50,6 +57,7 @@ public class Repositorio {
 		}
 		
 		try {
+			//Trato de bindar el servicio SCO del repositorio.
 			sco = new ServicioClOperadorImpl();
 			ServicioClOperadorInterface sco_remoto = (ServicioClOperadorInterface) UnicastRemoteObject.exportObject(sco, port + 1);
 			registry.rebind("rmi://"+ ip + ":2222/sco_remoto/" + (port + 1), sco_remoto);
@@ -60,6 +68,7 @@ public class Repositorio {
 		boolean salir = false;
 		int opcion = -1000;
 		
+		//Si el repositorio está logieado.
 		if(servicio_autenticacion.comprobarRepositorio(nombre_repositorio)) {
 			while(!salir) {
 				System.out.println("Elige la operación de repositorio");
@@ -67,6 +76,8 @@ public class Repositorio {
 				System.out.println("2. Listar ficheros del cliente");
 				System.out.println("3. Cerrar sesion y salir");
 				System.out.println("4. Eliminar Repositorio, cerrar sesión y salir");
+				
+				//Obtengo la opción elegida por el usuario.
 				try {
 					opcion = in.nextInt();
 				}
@@ -74,9 +85,11 @@ public class Repositorio {
 					opcion = 1000;
 				}
 				in.nextLine();
+				
 				switch(opcion) {
 					case 1: 
 						try {
+							//Listo los clientes del repositorio.
 							System.out.println("Los clientes con archivos en este repositorio actualmente son:");
 							System.out.println(Arrays.toString(servicio_gestor.getListaClientesRepositorio(nombre_repositorio).toArray()));	
 							System.out.println("");
@@ -89,6 +102,7 @@ public class Repositorio {
 						}
 					case 2:
 						try {
+							//listo los ficheros de un cliente determinado.
 							System.out.println("Indique el nombre del cliente:");
 							String nombre_cliente = in.nextLine();
 							System.out.println("Los archivos del cliente en este repositorio son:");
@@ -102,6 +116,7 @@ public class Repositorio {
 							break;
 						}
 					case 3:
+						//Cierro la sesión del repositorio.
 						servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
 						System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
 						salir = true;
@@ -110,6 +125,7 @@ public class Repositorio {
 						break;
 					case 4:
 						try {
+						//Elimino el repositorio del sistema, para ello primero cierro su sesión.
 						servicio_autenticacion.cerrarSesion(nombre_repositorio, 1);
 						System.out.println("Sesion cerrada del repositorio " + nombre_repositorio);
 						servicio_autenticacion.deleteObjeto(nombre_repositorio, 1);
@@ -119,6 +135,7 @@ public class Repositorio {
 						System.out.println("");
 						break;
 						} catch (CustomExceptions.RepositorioTodaviaNoUtilizado e) {
+							//En el caso de que no se haya utilizado el repositorio, su eliminaación no afecta al sistema de archivos.
 							System.out.println("Repositorio eliminado antes de haber sido utilizado, no se han producido cambios en el sistema");
 							salir = true;
 							break;
@@ -137,10 +154,13 @@ public class Repositorio {
 		} else {
 			System.out.println("Este repositorio no está conectado, conectelo antes en el menu de autenticación");
 		}
+		
+		//Unbind de los servicios propiedad del repositorio.
 		registry.unbind("rmi://"+ ip + ":2222/sco_remoto/" + (port + 1));
 		UnicastRemoteObject.unexportObject(sso, true);
 		registry.unbind("rmi://"+ ip + ":5555/sso_remoto/" + port);
 		UnicastRemoteObject.unexportObject(sco, true);
+		//Cierro el escaner.
 		in.close();
 	}
 }

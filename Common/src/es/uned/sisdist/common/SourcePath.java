@@ -1,5 +1,6 @@
 package es.uned.sisdist.common;
 
+//Clase inspirada en el vídeo del compañero indicado en el enunciado de la práctica para establecer CODEBASE de java rmi.
 public class SourcePath {
 	public static final String CODEBASE = "java.rmi.server.codebase";
 	
