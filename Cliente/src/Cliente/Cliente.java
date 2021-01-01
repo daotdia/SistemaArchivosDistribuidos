@@ -92,6 +92,14 @@ public class Cliente {
 						System.out.println("No hay repositorios libres para el usuario inicialice nuevos");
 						break;
 					}
+					catch (CustomExceptions.ElementoDuplicado e){
+						System.out.println("Este archivo ya ha sido subido con anterioridad, si quiere volver a subir su contenido cambie su nombre");
+						break;
+					}
+					catch (Exception e) {
+						System.out.println("No se ha podido subir el fichero, revisa que la ruta y el  nombre completo sean correctos");
+						break;
+					}
 					break;
 				case 2: 
 					//Bajar fichero en path indicado
@@ -132,6 +140,9 @@ public class Cliente {
 					servicio_gestor.compartirFichero(nombre, nombre_destinatario, nombre_fichero);
 					} catch (CustomExceptions.PermisoDenegado e) {
 						System.out.println("No es el propietario del archivo " + nombre_fichero + ", no puede compartirlo");
+					}
+					catch (CustomExceptions.ElementoDuplicado e) {
+						System.out.println("El destintario ya comparte o posee un archivo con este nombe, cambie el nombre del archivo si quiere compartirlo con él");
 					}
 					break;
 				case 5:

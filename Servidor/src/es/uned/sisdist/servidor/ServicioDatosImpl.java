@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import es.uned.sisdist.common.CustomExceptions;
 import es.uned.sisdist.common.MetaFichero;
 import es.uned.sisdist.common.Repositorio;
@@ -33,7 +32,7 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 	private HashMap<String, Integer> repositorios_logueados;
 	//Map de repositorios que ya han sido utilizados por añgún usuario.
 	private HashMap<String, Repositorio> repositorios_activos;
-	//MAo de los repositorios de cada usuario (sus nombres).
+	//MAp de los repositorios de cada usuario (sus nombres).
 	private HashMap<String,List<String>> repositorio_usuario;
 	//HashMao para cada usuario, con sus repositorios activos linkados que tienen archivos.
 	private HashMap<String, HashMap<String,List<MetaFichero>>> ficheros_usuario;
@@ -57,7 +56,23 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		ficheros_compartidos = new HashMap<String, HashMap<String,List<MetaFichero>>>();
 		siguiente_repositorio = 0;
 	}
-
+	
+	private void deleteFicheroCompartido(String nombre_propietario, String nombre_fichero) {
+		//Ver en cada usuario con ficheros compartidos.
+		for(Map.Entry<String, HashMap<String, List<MetaFichero>>> usuario_comp : ficheros_compartidos.entrySet()) {
+			//En cada uno de sus repoitorios.
+			for(Map.Entry<String, List<MetaFichero>> repo_comp : usuario_comp.getValue().entrySet()) {
+				//Sus ficheros compartidos.
+				Iterator<MetaFichero> it_comp = repo_comp.getValue().iterator(); 
+				while(it_comp.hasNext()) {
+					//Comprobar para cada uno de ellos si se corresponde con el fichero a eliminar.
+					if(it_comp.next().getNombre().equals(nombre_fichero)) {
+						it_comp.remove();
+					}
+				}
+			}
+		}
+	}			
 	//Método para añadir un cliente en la lista de clientes registrados.
 	public void registrarCliente(String nombre) throws RemoteException {
 		usuarios_registrados.add(nombre);
@@ -100,11 +115,19 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 		//Cuando se elimina el cliente de la lista de registrados, también se debe deslinkar sus repositorios. 
 		unlinkRepositorios(nombre);
 		
-		//También hay que eliminar los ficheros del usuario (y los compartidos).
 		if(ficheros_usuario.get(nombre) != null) {
+		//Hay que eliminar también los archivos compartidos a los usuarios con los que se haya compartido.
+			for(Map.Entry<String, List<MetaFichero>> repo_prop : ficheros_usuario.get(nombre).entrySet()) {
+				//Por cada fichero propio del usuario.
+				for(MetaFichero fichero_prop : repo_prop.getValue()) {
+					deleteFicheroCompartido(nombre, fichero_prop.getNombre());
+				}
+			}		
+			
+			//También hay que eliminar los ficheros del usuario.
 			ficheros_usuario.remove(nombre);
 		}
-		
+		//Y los ficheros que está compartiendo.
 		if(ficheros_compartidos != null) {
 			ficheros_compartidos.remove(nombre);
 		}
@@ -112,6 +135,18 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 
 	//Método para eliminar un repositorio de la lista de repositorios registrados.
 	public void deleteRepositorio(String nombre) throws RemoteException {
+		//Se tiene que comprobar los ficheros que se van a eliminar para borrarlos de los usuaios afectados (también sus posibles compaticiones).
+		for(Map.Entry<String, HashMap<String, List<MetaFichero>>> usuario : ficheros_usuario.entrySet()) {
+			for(Map.Entry<String, List<MetaFichero>> repo : usuario.getValue().entrySet()){
+				if(repo.getKey().equals(nombre)) {
+					Iterator<MetaFichero> it = repo.getValue().iterator();
+					while(it.hasNext()) {
+						deleteFicheroCompartido(usuario.getKey(), it.next().getNombre());
+					}
+					repo.setValue(new ArrayList<MetaFichero>());
+				}
+			}
+		}
 		//si está áctivo se elimina también de los repositorios activos.
 		nombre_repositorios_registrados.remove(nombre_repositorios_registrados.indexOf(nombre));
 		//si está áctivo se elimina también de los repositorios activos.
@@ -136,6 +171,8 @@ public class ServicioDatosImpl implements ServicioDatosInterface{
 				it.remove();
 			}
 		}
+		//Elimino la compartición con dicho archivo de todos los usuarios.
+		deleteFicheroCompartido(nombre_cliente, nombre_fichero);
 	}	
 
 	//Método para linkar en repositorio a un cliente dado por parámetro.

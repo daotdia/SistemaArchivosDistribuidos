@@ -74,13 +74,13 @@ public class AutenticacionCliente {
 						}
 						catch (CustomExceptions.NoHayRepositoriosLibres e) {
 							//Si no hay repositorio libres, no tiene sentido que un cliente pueda estar activo en el sistema.
-							throw new CustomExceptions.NoHayRepositoriosLibres("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
+							System.out.println("No existen más repositorios logueados de los que ya tiene linkados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
 						}
 						catch (CustomExceptions.ObjetoNoRegistrado e) {
-							throw new CustomExceptions.ObjetoNoRegistrado("Usuario no registrado");
+							System.out.println("Usuario no registrado");
 						}
 						catch (CustomExceptions.NoHayRepositoriosRegistrados e) {
-							throw new CustomExceptions.NoHayRepositoriosRegistrados("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
+							System.out.println("No existen repositorios logueados, vuelva a intentarlo más tarde o inicialice un nuevo repositorio");
 						}
 						//Iniicio la funcionalidad del cliente pasando por argumentos su nombre.
 						String [] array = new String[1];

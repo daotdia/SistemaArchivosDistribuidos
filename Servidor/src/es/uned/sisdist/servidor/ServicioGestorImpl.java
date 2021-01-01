@@ -49,6 +49,11 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	//Método que permite subir un fichero dado un path local y el nombre del fichero.
 	public void subirFichero(String nombre_cliente, String nombre_fichero, String path_local) throws RemoteException, Exception {
 		Repositorio repo;
+		for(MetaFichero fichero : servicio_datos.getListaFicherosCliente(nombre_cliente)){
+			if(fichero.getNombre().equals(nombre_fichero)) {
+				throw new CustomExceptions.ElementoDuplicado("Este archivo ya ha sido subido con anterioridad o ya lo está compartiendo, si quiere volver a subir su contenido cambie su nombre");
+			}
+		}
 		//En el caso de que el cliente tenga un repositorio asignado.
 		if(!servicio_datos.getRepositoriosUsuario(nombre_cliente).isEmpty()) {
 			//Se obtiene un repositorio al azar.
@@ -157,6 +162,11 @@ public class ServicioGestorImpl implements ServicioGestorInterface{
 	public void compartirFichero(String nombre_propietario, String nombre_destinatario, String nombre_fichero) throws Exception, RemoteException {
 		//Compruebo que el archivo que quiere compartir es de su propiedad.
 		if(comprobarPropiedad(nombre_propietario, nombre_fichero)) {
+			for(MetaFichero fichero : servicio_datos.getListaFicherosCliente(nombre_destinatario)) {
+				if(fichero.getNombre().equals(nombre_fichero)) {
+					throw new CustomExceptions.ElementoDuplicado();
+				}
+			}
 			//Añado el fichero compartido al cliente destintario en el servicio de datos.
 			Repositorio repo = servicio_datos.getRepositorioFichero(nombre_fichero, nombre_propietario);
 			servicio_datos.addMetaFicheroCompartido(repo.getNombre(), new MetaFichero(nombre_propietario, nombre_fichero), nombre_destinatario);

@@ -185,6 +185,7 @@ public class ServicioAutenticacionImpl implements ServicioAutenticacionInterface
 			if(servicio_datos.getListaClientesRegistrados().contains(nombre)) {
 				//Obtiene el servicio gestor de los repositorios del cliente y elimina sus carpetas de usuarios.
 				for (Repositorio repo : servicio_datos.getRepositoriosUsuario(nombre)) {
+					System.out.println(servicio_datos.getRepositoriosUsuario(nombre).size());
 					ServicioAutenticacionImpl.servicio_gestor = (ServicioSrOperadorInterface) registry.lookup("rmi://"+ ip + ":5555/sso_remoto/" + repo.getPortSso());
 					servicio_gestor.borrarCarpetaCliente(repo, nombre);
 				}

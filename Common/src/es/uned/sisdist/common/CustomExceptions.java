@@ -129,4 +129,25 @@ public class CustomExceptions extends RuntimeException {
 	        super (message, cause);
 	    }
 	}
+	
+	//Clase interna excepción para indicar que se está acediendo a un elemento duplicado.
+		public static class ElementoDuplicado extends CustomExceptions{
+			private static final long serialVersionUID = 1L;
+
+			public ElementoDuplicado () {
+				
+		    }
+
+		    public ElementoDuplicado (String message) {
+		        super (message);
+		    }
+
+		    public ElementoDuplicado (Throwable cause) {
+		        super (cause);
+		    }
+
+		    public ElementoDuplicado (String message, Throwable cause) {
+		        super (message, cause);
+		    }
+		}
 }

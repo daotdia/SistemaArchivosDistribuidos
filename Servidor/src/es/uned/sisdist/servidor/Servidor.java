@@ -127,6 +127,7 @@ public class Servidor implements Remote{
 						}
 						System.out.println("");
 					}
+					System.out.println("---");
 					break;
 				case 4: 
 					System.out.println("");
