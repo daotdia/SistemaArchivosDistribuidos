@@ -34,8 +34,10 @@ public class Servidor implements Remote{
 	
 	//Método principal Servidor. 
 	public static void main (String[] Args) throws Exception {
-		//Obtengo la IP local de la máquina dónde se ejecuta el Servidor, servirá para especificar las URL de los servicios remotos.
+		
 		SourcePath.setCodebase(ServicioAutenticacionInterface.class);
+		
+		//Obtengo la IP local de la máquina dónde se ejecuta el Servidor, servirá para especificar las URL de los servicios remotos.
 		InetAddress IP=InetAddress.getLocalHost();
 		ip = IP.getHostAddress();
 		

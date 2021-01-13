@@ -1,5 +1,5 @@
 eclipse.preferences.version=1
-org.eclipse.jdt.core.builder.resourceCopyExclusionFilter=
+org.eclipse.jdt.core.builder.resourceCopyExclusionFilter=*.ucls,*.useq
 org.eclipse.jdt.core.classpathVariable.JRE_LIB=/usr/lib/jvm/java-11-openjdk-amd64/lib/jrt-fs.jar
 org.eclipse.jdt.core.classpathVariable.JRE_SRC=
 org.eclipse.jdt.core.classpathVariable.JRE_SRCROOT=

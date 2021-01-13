@@ -1,7 +1,6 @@
-INDEX VERSION 1.131+/home/david/eclipse-workspace/.metadata/.plugins/org.eclipse.jdt.core
-3699428115.index
-646308851.index
-1546616210.index
-4145758927.index
-3820606036.index
-2254955024.index
+INDEX VERSION 1.131+C:\Users\David Otero\Downloads\eclipse-workspace\.metadata\.plugins\org.eclipse.jdt.core
+268119702.index
+714836089.index
+1248545562.index
+363738115.index
+3244704807.index
